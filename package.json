@@ -3,29 +3,30 @@
   "publisher": "mandrup",
   "version": "0.0.1",
   "displayName": "Remote - RDP",
-  "description": "Manage and connect to RDP sessions directly from VS Code",
+  "description": "Securely manage and launch Remote Desktop (RDP) sessions from within Visual Studio Code on Windows.",
   "categories": [
     "Other"
   ],
   "keywords": [
     "rdp",
-    "remote",
+    "remote-desktop",
     "windows",
-    "connection"
+    "mstsc",
+    "connection",
+    "remote",
+    "remote-session",
+    "rdp-client",
+    "vs code remote"
   ],
   "engines": {
     "vscode": "^1.100.0"
   },
-  "os": [
-    "win32"
-  ],
-  "icon": "images/marketplace.png", 
+  "icon": "images/marketplace.png",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mandrup/remote-rdp.git"
   },
   "license": "MIT",
-  "author": "",
   "type": "commonjs",
   "main": "./out/extension.js",
   "scripts": {
