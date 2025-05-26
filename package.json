@@ -1,0 +1,177 @@
+{
+  "name": "remote-rdp",
+  "publisher": "mandrup",
+  "version": "0.0.1",
+  "displayName": "Remote - RDP",
+  "description": "Manage and connect to RDP sessions directly from VS Code",
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "rdp",
+    "remote",
+    "windows",
+    "connection"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "os": [
+    "win32"
+  ],
+  "icon": "images/marketplace.png", 
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mandrup/remote-rdp.git"
+  },
+  "license": "MIT",
+  "author": "",
+  "type": "commonjs",
+  "main": "./out/extension.js",
+  "scripts": {
+    "clean": "rimraf out",
+    "compile": "npm run clean && tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./out/test/runTest.js",
+    "vscode:prepublish": "npm run compile",
+    "pretest": "npm run compile",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.21",
+    "@types/vscode": "^1.100.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.27.0",
+    "mocha": "^11.4.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.3.3"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "remoteRdpSidebar",
+          "title": "Remote RDP",
+          "icon": "images/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "remoteRdpSidebar": [
+        {
+          "id": "remoteRdpConnections",
+          "name": "Connections",
+          "icon": "images/icon.svg"
+        },
+        {
+          "id": "remoteRdpCredentials",
+          "name": "Credentials",
+          "icon": "images/icon.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "remote-rdp:connection:create",
+          "when": "view == remoteRdpConnections",
+          "group": "navigation"
+        },
+        {
+          "command": "remote-rdp:connection:export",
+          "when": "view == remoteRdpConnections",
+          "group": "secondary"
+        },
+        {
+          "command": "remote-rdp:connection:import",
+          "when": "view == remoteRdpConnections",
+          "group": "secondary"
+        },
+        {
+          "command": "remote-rdp:credential:create",
+          "when": "view == remoteRdpCredentials",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "remote-rdp:connection:delete",
+          "when": "view == remoteRdpConnections && viewItem == connectionItem",
+          "group": "inline@2"
+        },
+        {
+          "command": "remote-rdp:connection:update",
+          "when": "view == remoteRdpConnections && viewItem == connectionItem",
+          "group": "inline@1"
+        },
+        {
+          "command": "remote-rdp:connection:connect",
+          "when": "view == remoteRdpConnections && viewItem == connectionItem",
+          "group": "inline@0"
+        },
+        {
+          "command": "remote-rdp:credential:delete",
+          "when": "view == remoteRdpCredentials && viewItem == credentialItem",
+          "group": "inline@1"
+        },
+        {
+          "command": "remote-rdp:credential:update",
+          "when": "view == remoteRdpCredentials && viewItem == credentialItem",
+          "group": "inline@0"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "remote-rdp:connection:create",
+        "title": "Create: RDP Connection",
+        "icon": "$(add)"
+      },
+      {
+        "command": "remote-rdp:connection:delete",
+        "title": "Delete: RDP Connection",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "remote-rdp:connection:update",
+        "title": "Update: RDP Connection",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "remote-rdp:connection:export",
+        "title": "Export: RDP Connections",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "remote-rdp:connection:import",
+        "title": "Import: RDP Connections",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "remote-rdp:connection:connect",
+        "title": "Connect: RDP Connection",
+        "icon": "$(plug)",
+        "enablement": "!isInDiffEditor"
+      },
+      {
+        "command": "remote-rdp:credential:create",
+        "title": "Create: RDP Credential",
+        "icon": "$(add)"
+      },
+      {
+        "command": "remote-rdp:credential:delete",
+        "title": "Delete: RDP Credential",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "remote-rdp:credential:update",
+        "title": "Update: RDP Credential",
+        "icon": "$(edit)"
+      }
+    ]
+  }
+}
