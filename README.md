@@ -1,73 +1,81 @@
 # Remote - RDP
 
-**Manage and connect to RDP sessions directly from VS Code on Windows**
+[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/mandrup.remote-rdp?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=mandrup.remote-rdp)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/mandrup.remote-rdp?color=blue)](https://marketplace.visualstudio.com/items?itemName=mandrup.remote-rdp)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**A native VS Code extension for managing and launching Remote Desktop (RDP) sessions on Windows.**
 
 ---
 
-## Why Remote - RDP?
+## Overview
 
-As of **May 27th, 2025**, the official Windows Remote Desktop app has stopped working for many users. If you rely on RDP for remote connections, this can be a major disruption.
+As of **May 27, 2025**, Microsoft’s Remote Desktop app has been deprecated. If you rely on RDP in your day-to-day workflow, this change may have disrupted your routine.
 
-**Remote - RDP** is a lightweight, integrated VS Code extension that lets you manage, organize, and connect to your RDP sessions directly inside your favorite code editor.
+**Remote - RDP** is a lightweight, Windows-only extension for Visual Studio Code that brings back seamless RDP session management — right inside your development environment.
 
 ---
 
-## Features
+## Key Features
 
-- Create, update, and delete RDP connection entries  
-- Manage your RDP credentials securely  
-- Connect to remote Windows machines from within VS Code  
-- Easy-to-use sidebar UI for managing connections  
-- Export and import your RDP connection list for backup or sharing  
-- Fully native Windows support (`win32` only)
+- Manage RDP connection entries with ease
+- Securely store and reuse credentials
+- Launch remote desktop sessions with a single click
+- Organized, intuitive sidebar interface
+- Export and import connection lists for backup or sharing
+- Designed exclusively for Windows (`win32` platform)
 
 ---
 
 ## Getting Started
 
-1. Install **Remote - RDP** from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=mandrup.remote-rdp).
+1. **Install** the extension from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=mandrup.remote-rdp).
 
-2. Open the **Remote RDP** sidebar view in VS Code.
+2. **Open** the **Remote - RDP** sidebar in Visual Studio Code.
 
-3. Add new connections with your remote machine’s hostname or IP address.
+3. **Add** a new connection using the hostname or IP address of the remote machine.
 
-4. Add credentials associated with your RDP connections.
+4. **Attach** credentials to the connection as needed.
 
-5. Select a connection and click **Connect** to launch an RDP session.
+5. **Click** “Connect” to start your RDP session using the native Windows RDP client.
 
 ---
 
-## Requirements
+## System Requirements
 
 - Windows 10 or later  
-- VS Code version 1.100.0 or higher  
+- Visual Studio Code version `1.100.0` or higher  
+- Native RDP client (`mstsc.exe`) installed and available in `PATH`
 
 ---
 
-## Known Issues
+## Limitations
 
-- Currently supports only Windows platforms (`win32` OS).  
-- Requires native RDP client installed on your Windows machine.  
-- Connection speed and reliability depend on your network and remote host configuration.
+- Only available for Windows operating systems (`win32`)
+- Relies on the system-installed RDP client
+- Connection quality may vary based on network conditions and target host settings
 
 ---
 
-## Feedback and Support
+## Contributing & Support
 
-If you encounter any issues or have feature requests, please open an issue on [GitHub](https://github.com/mandrup/remote-rdp/issues).
+If you encounter issues, have ideas for improvement, or would like to contribute:
+
+- File an issue on [GitHub](https://github.com/mandrup/remote-rdp/issues)
+- Pull requests are welcome and encouraged
 
 ---
 
 ## License
 
-MIT License — see the [LICENSE](LICENSE) file for details.
+Distributed under the [MIT License](LICENSE).
 
 ---
 
-## Credits
+## Author
 
-Created and maintained by [mandrup](https://github.com/mandrup).
+Developed and maintained by [@mandrup](https://github.com/mandrup)
 
 ---
 
-Thank you for using **Remote - RDP**! Stay connected and productive. 🚀
+Thank you for using **Remote - RDP**
