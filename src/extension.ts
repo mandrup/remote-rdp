@@ -5,7 +5,7 @@ import { ConnectionsProvider, CredentialsProvider } from './providers'
 export function activate(context: vscode.ExtensionContext) {
     registerCommands(context)
 
-    const connectionsProvider = new ConnectionsProvider(context);
+    const connectionsProvider = new ConnectionsProvider(context)
     context.subscriptions.push(
         vscode.window.createTreeView('remoteRdpConnections', {
             treeDataProvider: connectionsProvider,

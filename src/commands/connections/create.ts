@@ -6,18 +6,20 @@ import { promptHostname, promptCredential, promptGroup } from '../../prompts'
 export default async function createConnectionCommand(context: vscode.ExtensionContext): Promise<void> {
     try {
         const hostname = await promptHostname()
-        if (!hostname) return
+        if (!hostname) {
+            return
+        }
 
         const groupResult = await promptGroup(context)
         if (groupResult.cancelled) {
             return
         }
-        
+
         const credential = await promptCredential(context)
         if (!credential) {
             return
         }
-        
+
         await createConnectionStorage(context, hostname, credential, groupResult.value)
         //vscode.window.showInformationMessage(MESSAGES.connection.created(hostname, groupResult.value))
 

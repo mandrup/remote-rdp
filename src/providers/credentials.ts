@@ -25,7 +25,9 @@ export class CredentialsProvider extends BaseProvider<CredentialItem> {
     }
 
     async getChildren(element?: CredentialItem): Promise<CredentialItem[]> {
-        if (element) return []
+        if (element) {
+            return []
+        }
 
         try {
             const credentials = await readCredentials(this.context)

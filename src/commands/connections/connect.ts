@@ -23,7 +23,9 @@ export default async function connectConnectionCommand(
             ? item.connection
             : await promptConnection(context, item)
 
-        if (!connection) return
+        if (!connection) {
+            return
+        }
 
         if (!connection.credentialUsername) {
             vscode.window.showErrorMessage('This connection has no credentials assigned. Please edit the connection to add credentials.')

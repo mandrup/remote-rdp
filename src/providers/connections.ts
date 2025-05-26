@@ -131,11 +131,15 @@ export class ConnectionsProvider
     sources: vscode.DataTransfer,
     token: vscode.CancellationToken
   ): Promise<void> {
-    if (token.isCancellationRequested || target.type !== 'group') return
+    if (token.isCancellationRequested || target.type !== 'group') {
+      return
+    }
 
     const targetGroup = (target as ConnectionGroupItem).group
     const data = sources.get(MIME_TYPES.connection)
-    if (!data) return
+    if (!data) {
+      return
+    }
 
     let draggedItems: ConnectionTreeItem[]
     try {
@@ -149,7 +153,9 @@ export class ConnectionsProvider
       .filter((item): item is ConnectionItem => item.type === 'connection')
       .map(item => item.connection)
 
-    if (!draggedConnections.length) return
+    if (!draggedConnections.length) {
+      return
+    }
 
     const allConnections = readConnections(this.context)
     const updated = allConnections.map(conn =>
@@ -173,10 +179,14 @@ export class ConnectionsProvider
     dataTransfer: vscode.DataTransfer,
     token: vscode.CancellationToken
   ): Promise<void> {
-    if (token.isCancellationRequested) return
+    if (token.isCancellationRequested) {
+      return
+    }
 
     const items = source.filter((item): item is ConnectionItem => item.type === 'connection')
-    if (!items.length) return
+    if (!items.length) {
+      return
+    }
 
     try {
       dataTransfer.set(MIME_TYPES.connection, new vscode.DataTransferItem(JSON.stringify(items)))

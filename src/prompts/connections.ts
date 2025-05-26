@@ -32,21 +32,23 @@ export async function promptGroup(
             { label: '', description: 'No group' }, // Blank option, results in undefined
             ...existingGroups.map(g => ({ label: g! })),
             { label: 'Create new group', alwaysShow: true },
-        ];
+        ]
 
         const selected = await vscode.window.showQuickPick(groupOptions, {
             placeHolder: 'Select an existing group, create new, or leave blank',
-        });
+        })
 
 
-        if (!selected) return { cancelled: true }
+        if (!selected) { 
+            return { cancelled: true } 
+        }
 
         if (selected.label === 'Create new group') {
             const newGroup = await vscode.window.showInputBox({
                 prompt: 'Enter new group name',
                 placeHolder: 'Leave empty for no group',
             })
-            if (newGroup === undefined) return { cancelled: true }
+            if (newGroup === undefined) { return { cancelled: true } }
             return { cancelled: false, value: newGroup || undefined }
         }
 
@@ -59,7 +61,9 @@ export async function promptGroup(
         placeHolder: 'Leave empty for no group',
     })
 
-    if (inputGroup === undefined) return { cancelled: true }
+    if (inputGroup === undefined) { 
+        return { cancelled: true } 
+    }
     return { cancelled: false, value: inputGroup || undefined }
 }
 

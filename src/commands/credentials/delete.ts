@@ -14,7 +14,9 @@ export default async function deleteCredentialCommand(
 ): Promise<void> {
   try {
     const credential = await promptCredentialToEdit(context, item)
-    if (!credential) return
+    if (!credential) {
+      return
+    }
 
     const connections = readConnections(context)
     const affectedConnections = connections.filter(
