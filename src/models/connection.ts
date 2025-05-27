@@ -11,21 +11,28 @@ export interface ConnectionModel {
 }
 
 export function isConnectionModel(value: unknown): value is ConnectionModel {
-  if (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as any).id === 'string' &&
-    typeof (value as any).hostname === 'string' &&
-    (typeof (value as any).group === 'undefined' ||
-      typeof (value as any).group === 'string') &&
-    (typeof (value as any).credentialUsername === 'undefined' ||
-      typeof (value as any).credentialUsername === 'string')
-  ) {
-    return true
+  if (typeof value !== 'object' || value === null) {
+    console.warn('Invalid ConnectionModel: not an object', value)
+    return false
   }
 
-  console.warn('Invalid ConnectionModel:', value)
-  return false
+  const obj = value as Record<string, unknown>
+
+  const hasRequiredProps =
+    typeof obj.id === 'string' &&
+    typeof obj.hostname === 'string'
+
+  const hasOptionalProps =
+    (obj.group === undefined || typeof obj.group === 'string') &&
+    (obj.credentialUsername === undefined || typeof obj.credentialUsername === 'string')
+
+  const isValid = hasRequiredProps && hasOptionalProps
+
+  if (!isValid) {
+    console.warn('Invalid ConnectionModel:', value)
+  }
+
+  return isValid
 }
 
 export function isConnectionModelArray(value: unknown): value is ConnectionModel[] {

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { readConnections } from '../../storage/connections'
+import { readConnections } from '../../storage'
 import { MESSAGES } from '../../constants'
 
 export default async function exportConnectionsCommand(context: vscode.ExtensionContext): Promise<void> {

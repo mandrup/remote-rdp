@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { readConnections, updateConnections } from '../../storage/connections'
+import { readConnections, updateConnections } from '../../storage'
 import { MESSAGES, COMMAND_IDS } from '../../constants'
 import { promptConnection, promptHostname, promptCredential, promptGroup } from '../../prompts'
 

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { readCredentials } from '../storage/credentials'
+import { readCredentials } from '../storage'
 import { createCredential } from '../storage'
 
 export async function promptCredential(

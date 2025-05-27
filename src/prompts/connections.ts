@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { readConnections } from '../storage/connections'
+import { readConnections } from '../storage'
 import type { ConnectionModel } from '../models/connection'
 
 export type GroupPromptResult = { cancelled: true } | { cancelled: false; value: string | undefined }
@@ -29,7 +29,7 @@ export async function promptGroup(
 
     if (existingGroups.length > 0) {
         const groupOptions = [
-            { label: '', description: 'No group' }, // Blank option, results in undefined
+            { label: '', description: 'No group' },
             ...existingGroups.map(g => ({ label: g! })),
             { label: 'Create new group', alwaysShow: true },
         ]
