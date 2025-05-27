@@ -32,7 +32,7 @@ jobs:
         run: npm run build
 
       - name: Run tests
-        run: npm test
+        run: xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24' npm test
 
       - name: Package extension
         run: npx vsce package
