@@ -41,6 +41,7 @@ export default async function connectConnectionCommand(
         const rdpContent = [
             `full address:s:${connection.hostname}`,
             `username:s:${connection.credentialUsername}`,
+            `remoteapplicationname:s:${connection.hostname}`,
             'screen mode id:i:2',
             'desktopwidth:i:1920',
             'desktopheight:i:1080',

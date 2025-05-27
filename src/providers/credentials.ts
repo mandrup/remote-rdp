@@ -47,7 +47,6 @@ export class CredentialsProvider extends BaseProvider<CredentialItem> {
         item.id = credential.id
         item.type = 'credential'
         item.credential = credential
-        item.tooltip = credential.username
         item.contextValue = 'credentialItem'
         item.iconPath = new vscode.ThemeIcon('key')
         return item
@@ -59,7 +58,6 @@ export class CredentialsProvider extends BaseProvider<CredentialItem> {
         item.type = 'credential'
         item.contextValue = 'emptyCredentials'
         item.iconPath = new vscode.ThemeIcon('info')
-        item.tooltip = 'No credentials available'
         return item
     }
 }

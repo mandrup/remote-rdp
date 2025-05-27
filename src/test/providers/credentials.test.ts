@@ -42,21 +42,4 @@ suite('Credentials Provider Test Suite', () => {
         assert.strictEqual(treeItem.label, 'testuser')
         assert.strictEqual(treeItem.collapsibleState, vscode.TreeItemCollapsibleState.None)
     })
-
-    test('credential items have correct context value', async () => {
-        await createTestCredential(context, crypto.randomUUID(), 'testuser', 'password123')
-        const children = await provider.getChildren()
-        const treeItem = provider.getTreeItem(children[0])
-
-        assert.strictEqual(treeItem.contextValue, 'credentialItem')
-        assert.strictEqual(treeItem.tooltip, 'testuser')
-    })
-
-    test('credential items have correct tooltip', async () => {
-        await createTestCredential(context, crypto.randomUUID(), 'testuser', 'testpass')
-        const children = await provider.getChildren()
-        const treeItem = provider.getTreeItem(children[0])
-
-        assert.strictEqual(treeItem.tooltip, 'testuser')
-    })
 })

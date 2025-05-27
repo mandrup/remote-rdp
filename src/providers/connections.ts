@@ -17,7 +17,6 @@ export class ConnectionItem extends vscode.TreeItem implements BaseTreeItem {
   ) {
     super(connection.hostname, collapsibleState)
     this.id = connection.id
-    //this.tooltip = connection.credentialUsername ? `Username: ${connection.credentialUsername}` : 'No credential assigned'
     this.description = connection.credentialUsername ?? 'No credential assigned'
     this.contextValue = 'connectionItem'
     this.iconPath = new vscode.ThemeIcon('remote')
@@ -33,7 +32,6 @@ class ConnectionGroupItem extends vscode.TreeItem implements BaseTreeItem {
     collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Expanded
   ) {
     super(group, collapsibleState)
-    this.tooltip = `${connections.length} connection(s)`
     this.contextValue = 'connectionGroup'
     this.iconPath = new vscode.ThemeIcon('folder')
   }
@@ -45,7 +43,6 @@ class EmptyItem extends vscode.TreeItem implements BaseTreeItem {
   constructor() {
     super('No connections saved', vscode.TreeItemCollapsibleState.None)
     this.id = 'empty'
-    this.tooltip = 'No connections are currently saved'
     this.contextValue = 'empty'
     this.iconPath = new vscode.ThemeIcon('info')
   }

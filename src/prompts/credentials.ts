@@ -13,7 +13,7 @@ export async function promptCredential(
       description: 'Create a new credential',
       isCreateNew: true
     },
-    ...(credentials.length ? [{ label: '$(dash) Existing credentials', kind: vscode.QuickPickItemKind.Separator }] : []),
+    //...(credentials.length ? [{ label: 'Existing credentials', kind: vscode.QuickPickItemKind.Separator }] : []),
     ...credentials.map(cred => ({
       label: cred.username,
       description: 'Existing credential',
