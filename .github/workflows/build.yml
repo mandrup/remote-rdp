@@ -10,7 +10,7 @@ on:
 
 jobs:
   frontend:
-    name: Build and Test Frontend
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
