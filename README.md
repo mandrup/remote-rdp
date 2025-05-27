@@ -1,5 +1,6 @@
 # Remote - RDP
 
+[![Build and Test](https://github.com/mandrup/remote-rdp/actions/workflows/build.yml/badge.svg)](https://github.com/mandrup/remote-rdp/actions/workflows/build.yml)
 [![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/mandrup.remote-rdp?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=mandrup.remote-rdp)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/mandrup.remote-rdp?color=blue)](https://marketplace.visualstudio.com/items?itemName=mandrup.remote-rdp)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
