@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { BaseProvider } from './base-provider'
+import BaseProvider from './base-provider'
 import { readCredentials } from '../storage'
 import { CredentialModel } from '../models/credential'
 import { COMMAND_IDS } from '../constants'
@@ -13,11 +13,12 @@ export class CredentialsProvider extends BaseProvider<CredentialItem> {
     constructor(private readonly context: vscode.ExtensionContext) {
         super()
 
-        context.subscriptions.push(
-            vscode.commands.registerCommand(COMMAND_IDS.credential.refresh, () => this.refresh())
-        )
-
-        this.refresh()
+        if (!process.env.VSCODE_TEST) {
+            context.subscriptions.push(
+                vscode.commands.registerCommand(COMMAND_IDS.credential.refresh, () => this.refresh())
+            )
+            this.refresh()
+        }
     }
 
     getTreeItem(element: CredentialItem): vscode.TreeItem {

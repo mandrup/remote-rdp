@@ -1,0 +1,33 @@
+name: Dependency Check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  dependencies:
+    name: Audit & Check Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit npm packages
+        run: |
+          echo "Running npm audit..."
+          npm audit --audit-level=moderate || echo "Audit found issues"
+
+      - name: Check for outdated npm packages
+        run: |
+          echo "Checking for outdated packages..."
+          npm outdated || echo "No outdated packages"

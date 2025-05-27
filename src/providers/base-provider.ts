@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-export abstract class BaseProvider<T> implements vscode.TreeDataProvider<T> {
+export default abstract class BaseProvider<T> implements vscode.TreeDataProvider<T> {
     protected readonly _onDidChangeTreeData = new vscode.EventEmitter<T | undefined>()
 
     readonly onDidChangeTreeData: vscode.Event<T | undefined> = this._onDidChangeTreeData.event

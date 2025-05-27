@@ -23,48 +23,76 @@ export async function promptGroup(
     current?: string
 ): Promise<GroupPromptResult> {
     const connections = readConnections(context)
-    const existingGroups = Array.from(
-        new Set(connections.map(c => c.group?.trim()).filter(Boolean))
+    const groups = Array.from(
+        new Set(connections.map(c => c.group?.trim()).filter((g): g is string => !!g))
     )
 
-    if (existingGroups.length > 0) {
-        const groupOptions = [
-            { label: '', description: 'No group' },
-            ...existingGroups.map(g => ({ label: g! })),
-            { label: 'Create new group', alwaysShow: true },
-        ]
-
-        const selected = await vscode.window.showQuickPick(groupOptions, {
-            placeHolder: 'Select an existing group, create new, or leave blank',
-        })
-
-
-        if (!selected) { 
-            return { cancelled: true } 
-        }
-
-        if (selected.label === 'Create new group') {
-            const newGroup = await vscode.window.showInputBox({
-                prompt: 'Enter new group name',
-                placeHolder: 'Leave empty for no group',
-            })
-            if (newGroup === undefined) { return { cancelled: true } }
-            return { cancelled: false, value: newGroup || undefined }
-        }
-
-        return { cancelled: false, value: selected.label }
+    if (groups.length === 0) {
+        return promptNewGroupInput(current)
     }
 
-    const inputGroup = await vscode.window.showInputBox({
+    const sortedGroups = sortGroups(groups, current)
+    const items = buildGroupOptions(sortedGroups, current)
+
+    const selected = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Select an existing group, create new, or leave blank',
+    })
+
+    if (!selected) {
+        return { cancelled: true }
+    }
+
+    if (selected.pickedValue === '__CREATE__') {
+        const newGroup = await vscode.window.showInputBox({
+            prompt: 'Enter new group name',
+            placeHolder: 'Leave empty for no group',
+        })
+        return { cancelled: newGroup === undefined, value: newGroup || undefined }
+    }
+
+    return { cancelled: false, value: selected.pickedValue }
+}
+
+function sortGroups(groups: string[], current?: string): string[] {
+    return current && groups.includes(current)
+        ? [current, ...groups.filter(g => g !== current)]
+        : groups
+}
+
+function buildGroupOptions(
+    sortedGroups: string[],
+    current?: string
+): Array<vscode.QuickPickItem & { pickedValue: string | undefined }> {
+    return [
+        ...sortedGroups.map(g => ({
+            label: g,
+            description: g === current ? '(current)' : undefined,
+            pickedValue: g,
+        })),
+        {
+            label: 'No group',
+            description: current === undefined ? '(current)' : undefined,
+            pickedValue: undefined,
+        },
+        {
+            label: 'Create new group',
+            alwaysShow: true,
+            description: '',
+            pickedValue: '__CREATE__',
+        }
+    ]
+}
+
+async function promptNewGroupInput(current?: string): Promise<GroupPromptResult> {
+    const value = await vscode.window.showInputBox({
         prompt: 'Enter group name (optional)',
         value: current,
         placeHolder: 'Leave empty for no group',
     })
 
-    if (inputGroup === undefined) { 
-        return { cancelled: true } 
-    }
-    return { cancelled: false, value: inputGroup || undefined }
+    return value === undefined
+        ? { cancelled: true }
+        : { cancelled: false, value: value || undefined }
 }
 
 export async function promptConnection(

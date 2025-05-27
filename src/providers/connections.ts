@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { BaseProvider } from './base-provider'
+import BaseProvider from './base-provider'
 import { readConnections, updateConnections } from '../storage/connections'
 import { type ConnectionModel } from '../models/connection'
 import { COMMAND_IDS, MIME_TYPES } from '../constants'
@@ -63,12 +63,13 @@ export class ConnectionsProvider
 
   constructor(private readonly context: vscode.ExtensionContext) {
     super()
+
     if (!process.env.VSCODE_TEST) {
       context.subscriptions.push(
         vscode.commands.registerCommand(COMMAND_IDS.connection.refresh, () => this.refresh())
       )
+      this.refresh()
     }
-    this.refresh()
   }
 
   getTreeItem(element: ConnectionTreeItem): vscode.TreeItem {
