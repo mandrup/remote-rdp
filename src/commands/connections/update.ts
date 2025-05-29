@@ -1,39 +1,37 @@
 import * as vscode from 'vscode'
-import { readConnections, updateConnections } from '../../storage'
+import { Storage } from '../../storage'
 import { MESSAGES, COMMAND_IDS } from '../../constants'
-import { promptConnection, promptHostname, promptCredential, promptGroup } from '../../prompts'
+import { Prompts } from '../../prompts'
 
 export default async function updateConnectionCommand(
     context: vscode.ExtensionContext,
     item?: vscode.TreeItem
 ): Promise<void> {
     try {
-        const connection = await promptConnection(context, item)
+        const connection = await Prompts.connection.connection(context, item)
         if (!connection) {
             return
         }
 
-        
-        const hostname = await promptHostname(connection.hostname)
+        const hostname = await Prompts.connection.hostname(connection.hostname)
         if (!hostname) {
             return
         }
-        
-        const groupResult = await promptGroup(context, connection.group)
+
+        const groupResult = await Prompts.connection.group(context, connection.group)
         if (groupResult.cancelled) {
             return
         }
 
-        const credentialUsername = await promptCredential(context, connection.credentialUsername)
-        
-        const connections = readConnections(context)
+        const credentialUsername = await Prompts.credential.credential(context, connection.credentialUsername)
+
+        const connections = Storage.connection.readAll(context)
         const updatedConnections = connections.map(conn =>
             conn.id === connection.id
                 ? { ...conn, hostname, credentialUsername, group: groupResult.value }
                 : conn
         )
-        await updateConnections(context, updatedConnections)
-        //vscode.window.showInformationMessage(MESSAGES.connection.updated(hostname))
+        await Storage.connection.updateAll(context, updatedConnections)
 
         await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
         await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)

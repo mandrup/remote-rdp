@@ -13,15 +13,15 @@ import exportConnectionsCommand from './connections/export'
 import createCredentialCommand from './credentials/create'
 import updateCredentialCommand from './credentials/update'
 import deleteCredentialCommand from './credentials/delete'
-//import { pickCredential } from './credentials/pick'
 
 let commandsRegistered = false
 
 export function registerCommands(context: vscode.ExtensionContext): void {
-  if (commandsRegistered) { return }
+  if (commandsRegistered) {
+    return
+  }
   commandsRegistered = true
 
-  // Connection commands
   context.subscriptions.push(
     vscode.commands.registerCommand(COMMAND_IDS.connection.create, () => createConnectionCommand(context)),
     vscode.commands.registerCommand(COMMAND_IDS.connection.update, (item?: vscode.TreeItem) => updateConnectionCommand(context, item)),
@@ -30,8 +30,7 @@ export function registerCommands(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(COMMAND_IDS.connection.import, () => importConnectionsCommand(context)),
     vscode.commands.registerCommand(COMMAND_IDS.connection.export, () => exportConnectionsCommand(context))
   )
-
-  // Credential commands
+  
   context.subscriptions.push(
     vscode.commands.registerCommand(COMMAND_IDS.credential.create, () => createCredentialCommand(context)),
     vscode.commands.registerCommand(COMMAND_IDS.credential.update, (item?: vscode.TreeItem) => updateCredentialCommand(context, item)),

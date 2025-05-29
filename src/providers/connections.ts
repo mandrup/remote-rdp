@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import BaseProvider from './base-provider'
-import { readConnections, updateConnections } from '../storage/connections'
+import { Storage } from '../storage'
 import { type ConnectionModel } from '../models/connection'
 import { COMMAND_IDS, MIME_TYPES } from '../constants'
 
@@ -75,7 +75,7 @@ export class ConnectionsProvider
 
   async getChildren(element?: ConnectionTreeItem): Promise<ConnectionTreeItem[]> {
     try {
-      const connections = readConnections(this.context)
+      const connections = Storage.connection.readAll(this.context)
 
       if (element) {
         return element.type === 'group'
@@ -155,7 +155,7 @@ export class ConnectionsProvider
       return
     }
 
-    const allConnections = readConnections(this.context)
+    const allConnections = Storage.connection.readAll(this.context)
     const updated = allConnections.map(conn =>
       draggedConnections.some(d => d.id === conn.id)
         ? { ...conn, group: targetGroup === 'Ungrouped' ? undefined : targetGroup }
@@ -163,7 +163,7 @@ export class ConnectionsProvider
     )
 
     try {
-      await updateConnections(this.context, updated)
+      await Storage.connection.updateAll(this.context, updated)
       this.updateGroups(updated)
       this.refresh()
     } catch (err) {

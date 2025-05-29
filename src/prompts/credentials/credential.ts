@@ -1,19 +1,18 @@
 import * as vscode from 'vscode'
-import { readCredentials } from '../storage'
-import { createCredential } from '../storage'
+import { Storage } from '../../storage'
+import { Prompts } from '..'
 
-export async function promptCredential(
+export async function credentialPrompt(
   context: vscode.ExtensionContext,
   current?: string
 ): Promise<string | undefined> {
-  const credentials = await readCredentials(context)
+  const credentials = await Storage.credential.readAll(context)
   const items = [
     {
       label: '$(add) Create new credential',
       description: 'Create a new credential',
       isCreateNew: true
     },
-    //...(credentials.length ? [{ label: 'Existing credentials', kind: vscode.QuickPickItemKind.Separator }] : []),
     ...credentials.map(cred => ({
       label: cred.username,
       description: 'Existing credential',
@@ -27,25 +26,50 @@ export async function promptCredential(
 
   if (!selected) {
     return undefined
+
   }
 
   if (selected.isCreateNew) {
-    const details = await promptCredentialDetails()
+    const details = await Prompts.credential.credentialDetails()
     if (!details) {
       return undefined
     }
-    await createCredential(context, details.username, details.password)
+    await Storage.credential.create(context, details.username, details.password)
     return details.username
   }
 
   return selected.label
 }
 
-export async function promptCredentialToEdit(
+export async function credentialDetailsPrompt(
+  currentUsername?: string
+): Promise<{ username: string; password: string } | undefined> {
+  const username = await vscode.window.showInputBox({
+    prompt: currentUsername ? 'Enter new username' : 'Enter username',
+    value: currentUsername,
+    placeHolder: 'Enter username'
+  })
+  if (!username) {
+    return undefined
+  }
+
+  const password = await vscode.window.showInputBox({
+    prompt: currentUsername ? 'Enter new password' : 'Enter password',
+    password: true,
+    placeHolder: 'Enter password'
+  })
+  if (!password) {
+    return undefined
+  }
+
+  return { username, password }
+}
+
+export async function editCredentialDetailsPrompt(
   context: vscode.ExtensionContext,
   item?: vscode.TreeItem
 ): Promise<{ id: string; username: string; password: string } | undefined> {
-  const credentials = await readCredentials(context)
+  const credentials = await Storage.credential.readAll(context)
 
   if (item?.contextValue === 'emptyCredentials') {
     return undefined
@@ -70,27 +94,3 @@ export async function promptCredentialToEdit(
 
   return selected ? credentials.find(c => c.username === selected.label) : undefined
 }
-
-export async function promptCredentialDetails(
-  currentUsername?: string
-): Promise<{ username: string; password: string } | undefined> {
-  const username = await vscode.window.showInputBox({
-    prompt: currentUsername ? 'Enter new username' : 'Enter username',
-    value: currentUsername,
-    placeHolder: 'Enter username'
-  })
-  if (!username) {
-    return undefined
-  }
-
-  const password = await vscode.window.showInputBox({
-    prompt: currentUsername ? 'Enter new password' : 'Enter password',
-    password: true,
-    placeHolder: 'Enter password'
-  })
-  if (!password) {
-    return undefined
-  }
-
-  return { username, password }
-} 

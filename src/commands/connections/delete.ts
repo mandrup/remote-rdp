@@ -1,22 +1,21 @@
 import * as vscode from 'vscode'
-import { readConnections, updateConnections } from '../../storage'
+import { Storage } from '../../storage'
 import { MESSAGES, COMMAND_IDS } from '../../constants'
-import { promptConnection } from '../../prompts'
+import { Prompts } from '../../prompts'
 
 export default async function deleteConnectionCommand(
     context: vscode.ExtensionContext,
     item?: vscode.TreeItem
 ): Promise<void> {
     try {
-        const connection = await promptConnection(context, item)
+        const connection = await Prompts.connection.connection(context, item)
         if (!connection) {
             return
         }
 
-        const connections = readConnections(context)
+        const connections = Storage.connection.readAll(context)
         const updatedConnections = connections.filter(conn => conn.id !== connection.id)
-        await updateConnections(context, updatedConnections)
-        //vscode.window.showInformationMessage(MESSAGES.connection.deleted(connection.hostname))
+        await Storage.connection.updateAll(context, updatedConnections)
 
         await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
     } catch (error) {

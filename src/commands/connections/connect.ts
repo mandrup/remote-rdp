@@ -4,8 +4,8 @@ import * as os from 'os'
 import * as path from 'path'
 import { exec } from 'child_process'
 import { MESSAGES } from '../../constants'
-import { promptConnection } from '../../prompts'
-import { getCredentialWithPassword } from '../../storage'
+import { Prompts } from '../../prompts'
+import { Storage } from '../../storage'
 import { ConnectionItem } from '../../providers'
 
 export default async function connectConnectionCommand(
@@ -19,9 +19,7 @@ export default async function connectConnectionCommand(
             return
         }
 
-        const connection = item instanceof ConnectionItem
-            ? item.connection
-            : await promptConnection(context, item)
+        const connection = item instanceof ConnectionItem ? item.connection : await Prompts.connection.connection(context, item)
 
         if (!connection) {
             return
@@ -32,7 +30,7 @@ export default async function connectConnectionCommand(
             return
         }
 
-        const credential = await getCredentialWithPassword(context, connection.credentialUsername)
+        const credential = await Storage.credential.readWithPassword(context, connection.credentialUsername)
         if (!credential) {
             vscode.window.showErrorMessage(`Could not find or access credential for username "${connection.credentialUsername}". The credential may have been deleted.`)
             return
@@ -56,21 +54,28 @@ export default async function connectConnectionCommand(
         const tmpRdp = path.join(os.tmpdir(), `remote-rdp-${Date.now()}.rdp`)
         fs.writeFileSync(tmpRdp, rdpContent, { encoding: 'utf8' })
 
-        const cmd = `cmdkey /generic:"${connection.hostname}" /user:"${credential.username}" /pass:"${credential.password}"`
-        exec(cmd, (error) => {
-            if (error) {
-                console.error('Failed to save credentials:', error)
-                vscode.window.showErrorMessage('Failed to save credentials for RDP connection.')
-                try { fs.unlinkSync(tmpRdp) } catch (_) { }
-                return
+        const deleteCmd = `cmdkey /delete:"${connection.hostname}"`
+        exec(deleteCmd, (deleteError) => {
+            if (deleteError) {
+                console.warn('Could not delete existing credentials (might not exist):', deleteError.message)
             }
 
-            exec(`mstsc "${tmpRdp}"`, (error) => {
-                try { fs.unlinkSync(tmpRdp) } catch (_) { }
-                if (error) {
-                    console.error('Failed to launch RDP connection:', error)
-                    vscode.window.showErrorMessage('Failed to launch RDP connection.')
+            const addCmd = `cmdkey /generic:"${connection.hostname}" /user:"${credential.username}" /pass:"${credential.password}"`
+            exec(addCmd, (addError) => {
+                if (addError) {
+                    console.error('Failed to save credentials:', addError)
+                    vscode.window.showErrorMessage('Failed to save credentials for RDP connection.')
+                    try { fs.unlinkSync(tmpRdp) } catch (_) { }
+                    return
                 }
+
+                exec(`mstsc "${tmpRdp}"`, (rdpError) => {
+                    try { fs.unlinkSync(tmpRdp) } catch (_) { }
+                    if (rdpError) {
+                        console.error('Failed to launch RDP connection:', rdpError)
+                        vscode.window.showErrorMessage('Failed to launch RDP connection.')
+                    }
+                })
             })
         })
 

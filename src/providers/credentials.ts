@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import BaseProvider from './base-provider'
-import { readCredentials } from '../storage'
+import { Storage } from '../storage'
 import { CredentialModel } from '../models/credential'
 import { COMMAND_IDS } from '../constants'
 
@@ -31,7 +31,7 @@ export class CredentialsProvider extends BaseProvider<CredentialItem> {
         }
 
         try {
-            const credentials = await readCredentials(this.context)
+            const credentials = await Storage.credential.readAll(this.context)
             return credentials.length
                 ? credentials.map(c => this.createCredentialItem(c))
                 : [this.createEmptyItem()]

@@ -1,27 +1,26 @@
 import * as vscode from 'vscode'
-import { createConnection as createConnectionStorage } from '../../storage'
+import { Storage } from '../../storage'
 import { MESSAGES, COMMAND_IDS } from '../../constants'
-import { promptHostname, promptCredential, promptGroup } from '../../prompts'
+import { Prompts } from '../../prompts'
 
 export default async function createConnectionCommand(context: vscode.ExtensionContext): Promise<void> {
     try {
-        const hostname = await promptHostname()
+        const hostname = await Prompts.connection.hostname()
         if (!hostname) {
             return
         }
 
-        const groupResult = await promptGroup(context)
+        const groupResult = await Prompts.connection.group(context)
         if (groupResult.cancelled) {
             return
         }
 
-        const credential = await promptCredential(context)
+        const credential = await Prompts.credential.credential(context)
         if (!credential) {
             return
         }
 
-        await createConnectionStorage(context, hostname, credential, groupResult.value)
-        //vscode.window.showInformationMessage(MESSAGES.connection.created(hostname, groupResult.value))
+        await Storage.connection.create(context, hostname, credential, groupResult.value)
 
         await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
         await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)
