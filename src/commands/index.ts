@@ -1,15 +1,11 @@
 import * as vscode from 'vscode'
 import { COMMAND_IDS } from '../constants'
-
-// Connection commands
 import createConnectionCommand from './connections/create'
 import updateConnectionCommand from './connections/update'
 import deleteConnectionCommand from './connections/delete'
 import connectConnectionCommand from './connections/connect'
 import importConnectionsCommand from './connections/import'
 import exportConnectionsCommand from './connections/export'
-
-// Credential commands
 import createCredentialCommand from './credentials/create'
 import updateCredentialCommand from './credentials/update'
 import deleteCredentialCommand from './credentials/delete'

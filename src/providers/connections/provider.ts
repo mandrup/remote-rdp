@@ -5,13 +5,10 @@ import { COMMAND_IDS, MIME_TYPES } from '../../constants'
 import { ConnectionTreeItem, ConnectionItem, ConnectionGroupItem, EmptyItem } from './items'
 import { ConnectionModel } from '../../models/connection'
 
-export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implements vscode.TreeDragAndDropController<ConnectionTreeItem> {
-    private readonly groups = new Map<string, ConnectionModel[]>()
+export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implements vscode.TreeDataProvider<ConnectionTreeItem> {
+    protected readonly groups = new Map<string, ConnectionModel[]>()
 
-    readonly dragMimeTypes = [MIME_TYPES.connection]
-    readonly dropMimeTypes = [MIME_TYPES.connection]
-
-    constructor(private readonly context: vscode.ExtensionContext) {
+    constructor(protected readonly context: vscode.ExtensionContext) {
         super()
 
         if (!process.env.VSCODE_TEST) {
@@ -59,7 +56,7 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
         }
     }
 
-    private createConnectionItem(connection: ConnectionModel): ConnectionItem {
+    protected createConnectionItem(connection: ConnectionModel): ConnectionItem {
         const item = new vscode.TreeItem(connection.hostname, vscode.TreeItemCollapsibleState.None) as ConnectionItem
         item.id = connection.id
         item.type = 'connection'
@@ -70,7 +67,7 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
         return item
     }
 
-    private createGroupItem(group: string, connections: ConnectionModel[]): ConnectionGroupItem {
+    protected createGroupItem(group: string, connections: ConnectionModel[]): ConnectionGroupItem {
         const item = new vscode.TreeItem(group, vscode.TreeItemCollapsibleState.Expanded) as ConnectionGroupItem
         item.type = 'group'
         item.group = group
@@ -81,7 +78,7 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
         return item
     }
 
-    private createEmptyItem(): EmptyItem {
+    protected createEmptyItem(): EmptyItem {
         const item = new vscode.TreeItem('No connections saved', vscode.TreeItemCollapsibleState.None) as EmptyItem
         item.id = 'empty'
         item.type = 'empty'
@@ -90,7 +87,7 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
         return item
     }
 
-    private updateGroups(connections: ConnectionModel[]): void {
+    protected updateGroups(connections: ConnectionModel[]): void {
         this.groups.clear()
         for (const conn of connections) {
             const group = conn.group?.trim() || 'Ungrouped'
@@ -100,81 +97,4 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
             this.groups.get(group)!.push(conn)
         }
     }
-
-    getDragMimeTypes(source: ConnectionTreeItem[]): string[] {
-        return source.every(item => item.type === 'connection') ? [MIME_TYPES.connection] : []
-    }
-
-    getDropMimeTypes(target: ConnectionTreeItem): string[] {
-        return target.type === 'group' ? [MIME_TYPES.connection] : []
-    }
-
-    async handleDrop(
-        target: ConnectionTreeItem,
-        sources: vscode.DataTransfer,
-        token: vscode.CancellationToken
-    ): Promise<void> {
-        if (token.isCancellationRequested || target.type !== 'group') {
-            return
-        }
-
-        const targetGroup = (target as ConnectionGroupItem).group
-        const data = sources.get(MIME_TYPES.connection)
-        if (!data) {
-            return
-        }
-
-        let draggedItems: ConnectionTreeItem[]
-        try {
-            draggedItems = JSON.parse(await data.asString())
-        } catch (err) {
-            console.error('Failed to parse dragged items:', err)
-            return
-        }
-
-        const draggedConnections = draggedItems
-            .filter((item): item is ConnectionItem => item.type === 'connection')
-            .map(item => item.connection)
-
-        if (!draggedConnections.length) {
-            return
-        }
-
-        const allConnections = Storage.connection.readAll(this.context)
-        const updated = allConnections.map(conn =>
-            draggedConnections.some(d => d.id === conn.id)
-                ? { ...conn, group: targetGroup === 'Ungrouped' ? undefined : targetGroup }
-                : conn
-        )
-
-        try {
-            await Storage.connection.updateAll(this.context, updated)
-            this.updateGroups(updated)
-            this.refresh()
-        } catch (err) {
-            console.error('Failed to update connections:', err)
-            vscode.window.showErrorMessage('Failed to update connection.')
-        }
-    }
-
-    async handleDrag(
-        source: ConnectionTreeItem[],
-        dataTransfer: vscode.DataTransfer,
-        token: vscode.CancellationToken
-    ): Promise<void> {
-        if (token.isCancellationRequested) {
-            return
-        }
-
-        const items = source.filter((item): item is ConnectionItem => item.type === 'connection')
-        if (!items.length) {
-            return
-        }
-
-        try {
-            dataTransfer.set(MIME_TYPES.connection, new vscode.DataTransferItem(JSON.stringify(items)))
-        } catch (err) {
-            console.error('Failed to handle drag:', err)
-        }
-    }
-} 
+}
