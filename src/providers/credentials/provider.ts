@@ -1,15 +1,11 @@
 import * as vscode from 'vscode'
-import BaseProvider from './base-provider'
-import { Storage } from '../storage'
-import { CredentialModel } from '../models/credential'
-import { COMMAND_IDS } from '../constants'
+import BaseProvider from '../base-provider'
+import { Storage } from '../../storage'
+import { COMMAND_IDS } from '../../constants'
+import { CredentialTreeItem, CredentialItem, EmptyItem } from './items'
+import { CredentialModel } from '../../models/credential'
 
-interface CredentialItem extends vscode.TreeItem {
-    type: 'credential'
-    credential: CredentialModel
-}
-
-export class CredentialsProvider extends BaseProvider<CredentialItem> {
+export class CredentialsProvider extends BaseProvider<CredentialTreeItem> {
     constructor(private readonly context: vscode.ExtensionContext) {
         super()
 
@@ -21,11 +17,11 @@ export class CredentialsProvider extends BaseProvider<CredentialItem> {
         }
     }
 
-    getTreeItem(element: CredentialItem): vscode.TreeItem {
+    getTreeItem(element: CredentialTreeItem): vscode.TreeItem {
         return element
     }
 
-    async getChildren(element?: CredentialItem): Promise<CredentialItem[]> {
+    async getChildren(element?: CredentialTreeItem): Promise<CredentialTreeItem[]> {
         if (element) {
             return []
         }
@@ -52,12 +48,12 @@ export class CredentialsProvider extends BaseProvider<CredentialItem> {
         return item
     }
 
-    private createEmptyItem(): CredentialItem {
-        const item = new vscode.TreeItem('No credentials saved', vscode.TreeItemCollapsibleState.None) as CredentialItem
+    private createEmptyItem(): EmptyItem {
+        const item = new vscode.TreeItem('No credentials saved', vscode.TreeItemCollapsibleState.None) as EmptyItem
         item.id = 'empty'
-        item.type = 'credential'
+        item.type = 'empty'
         item.contextValue = 'emptyCredentials'
         item.iconPath = new vscode.ThemeIcon('info')
         return item
     }
-}
+} 

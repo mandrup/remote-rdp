@@ -16,24 +16,29 @@ import deleteCredentialCommand from './credentials/delete'
 
 let commandsRegistered = false
 
-export function registerCommands(context: vscode.ExtensionContext): void {
-  if (commandsRegistered) {
-    return
-  }
-  commandsRegistered = true
+export async function handleCommandError(operation: string, error: unknown): Promise<void> {
+    console.error(`Failed to ${operation}:`, error)
+    vscode.window.showErrorMessage(`Failed to ${operation}: ${error instanceof Error ? error.message : String(error)}`)
+}
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand(COMMAND_IDS.connection.create, () => createConnectionCommand(context)),
-    vscode.commands.registerCommand(COMMAND_IDS.connection.update, (item?: vscode.TreeItem) => updateConnectionCommand(context, item)),
-    vscode.commands.registerCommand(COMMAND_IDS.connection.delete, (item?: vscode.TreeItem) => deleteConnectionCommand(context, item)),
-    vscode.commands.registerCommand(COMMAND_IDS.connection.connect, (item?: vscode.TreeItem) => connectConnectionCommand(context, item)),
-    vscode.commands.registerCommand(COMMAND_IDS.connection.import, () => importConnectionsCommand(context)),
-    vscode.commands.registerCommand(COMMAND_IDS.connection.export, () => exportConnectionsCommand(context))
-  )
-  
-  context.subscriptions.push(
-    vscode.commands.registerCommand(COMMAND_IDS.credential.create, () => createCredentialCommand(context)),
-    vscode.commands.registerCommand(COMMAND_IDS.credential.update, (item?: vscode.TreeItem) => updateCredentialCommand(context, item)),
-    vscode.commands.registerCommand(COMMAND_IDS.credential.delete, (item?: vscode.TreeItem) => deleteCredentialCommand(context, item))
-  )
+export function registerCommands(context: vscode.ExtensionContext): void {
+    if (commandsRegistered) {
+        return
+    }
+    commandsRegistered = true
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(COMMAND_IDS.connection.create, () => createConnectionCommand(context)),
+        vscode.commands.registerCommand(COMMAND_IDS.connection.update, (item?: vscode.TreeItem) => updateConnectionCommand(context, item)),
+        vscode.commands.registerCommand(COMMAND_IDS.connection.delete, (item?: vscode.TreeItem) => deleteConnectionCommand(context, item)),
+        vscode.commands.registerCommand(COMMAND_IDS.connection.connect, (item?: vscode.TreeItem) => connectConnectionCommand(context, item)),
+        vscode.commands.registerCommand(COMMAND_IDS.connection.import, () => importConnectionsCommand(context)),
+        vscode.commands.registerCommand(COMMAND_IDS.connection.export, () => exportConnectionsCommand(context))
+    )
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(COMMAND_IDS.credential.create, () => createCredentialCommand(context)),
+        vscode.commands.registerCommand(COMMAND_IDS.credential.update, (item?: vscode.TreeItem) => updateCredentialCommand(context, item)),
+        vscode.commands.registerCommand(COMMAND_IDS.credential.delete, (item?: vscode.TreeItem) => deleteCredentialCommand(context, item))
+    )
 }

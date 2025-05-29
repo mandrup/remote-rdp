@@ -19,7 +19,9 @@ export default async function connectConnectionCommand(
             return
         }
 
-        const connection = item instanceof ConnectionItem ? item.connection : await Prompts.connection.connection(context, item)
+        const connection = item && 'type' in item && item.type === 'connection'
+            ? (item as ConnectionItem).connection
+            : await Prompts.connection.connection(context, item)
 
         if (!connection) {
             return

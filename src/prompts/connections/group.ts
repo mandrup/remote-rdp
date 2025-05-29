@@ -16,23 +16,18 @@ export default async function groupPrompt(
         return promptNewGroupInput(current)
     }
 
-    const sortedGroups = current && groups.includes(current) ? [current, ...groups.filter(g => g !== current)] : groups
     const items = [
-        ...sortedGroups.map(g => ({
+        ...groups.map(g => ({
             label: g,
             description: g === current ? '(current)' : undefined,
-            pickedValue: g,
         })),
         {
             label: 'No group',
             description: current === undefined ? '(current)' : undefined,
-            pickedValue: undefined,
         },
         {
             label: 'Create new group',
             alwaysShow: true,
-            description: '',
-            pickedValue: '__CREATE__',
         }
     ]
 
@@ -44,7 +39,7 @@ export default async function groupPrompt(
         return { cancelled: true }
     }
 
-    if (selected.pickedValue === '__CREATE__') {
+    if (selected.label === 'Create new group') {
         const newGroup = await vscode.window.showInputBox({
             prompt: 'Enter new group name',
             placeHolder: 'Leave empty for no group',
@@ -52,15 +47,14 @@ export default async function groupPrompt(
         return { cancelled: newGroup === undefined, value: newGroup || undefined }
     }
 
-    return { cancelled: false, value: selected.pickedValue }
+    return { cancelled: false, value: selected.label === 'No group' ? undefined : selected.label }
 }
 
 async function promptNewGroupInput(current?: string): Promise<GroupPromptResult> {
-    const value = await vscode.window.showInputBox({
+    const inputGroup = await vscode.window.showInputBox({
         prompt: 'Enter group name (optional)',
         value: current,
         placeHolder: 'Leave empty for no group',
     })
-
-    return value === undefined ? { cancelled: true } : { cancelled: false, value: value || undefined }
+    return { cancelled: inputGroup === undefined, value: inputGroup || undefined }
 }

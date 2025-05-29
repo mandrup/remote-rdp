@@ -1,7 +1,8 @@
 import * as vscode from 'vscode'
 import { Storage } from '../../storage'
-import { MESSAGES, COMMAND_IDS } from '../../constants'
+import { COMMAND_IDS } from '../../constants'
 import { Prompts } from '../../prompts'
+import { handleCommandError } from '..'
 
 export default async function createConnectionCommand(context: vscode.ExtensionContext): Promise<void> {
     try {
@@ -25,7 +26,6 @@ export default async function createConnectionCommand(context: vscode.ExtensionC
         await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
         await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)
     } catch (error) {
-        console.error('Failed to create connection:', error)
-        vscode.window.showErrorMessage(MESSAGES.operationFailed('create connection', error))
+        await handleCommandError('create connection', error)
     }
 }
