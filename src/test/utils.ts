@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { PREFIXES } from '../constants'
-import { readConnections, updateConnections, createCredential } from '../storage'
+import { Storage } from '../storage'
 import { CredentialModel, isCredentialModelArray } from '../models/credential'
 import { ConnectionModel } from '../models/connection'
 
@@ -58,9 +58,9 @@ export async function createTestConnection(
     ...(group !== undefined ? { group } : {})
   }
 
-  const connections = readConnections(context)
+  const connections = Storage.connection.readAll(context)
   connections.push(connection)
-  await updateConnections(context, connections)
+  await Storage.connection.updateAll(context, connections)
   return connection
 }
 
@@ -82,7 +82,7 @@ export async function createTestCredential(
 
   const credentials = readCredentials(context)
   if (!credentials.some(c => c.username === username)) {
-    await createCredential(context, username, password)
+    await Storage.credential.create(context, username, password)
   }
   return credential
 }

@@ -1,11 +1,7 @@
 import * as vscode from 'vscode'
-import {
-  readConnections,
-  clearConnectionsCredential,
-  deleteCredential
-} from '../../storage'
+import { Storage } from '../../storage'
 import { MESSAGES, COMMAND_IDS } from '../../constants'
-import { promptCredentialToEdit } from '../../prompts'
+import { Prompts } from '../../prompts'
 import type { ConnectionModel } from '../../models/connection'
 
 export default async function deleteCredentialCommand(
@@ -13,23 +9,21 @@ export default async function deleteCredentialCommand(
   item?: vscode.TreeItem
 ): Promise<void> {
   try {
-    const credential = await promptCredentialToEdit(context, item)
+    const credential = await Prompts.credential.editCredentialDetails(context, item)
     if (!credential) {
       return
     }
 
-    const connections = readConnections(context)
+    const connections = Storage.connection.readAll(context)
     const affectedConnections = connections.filter(
       (conn: ConnectionModel) => conn.credentialUsername === credential.username
     )
 
-    await deleteCredential(context, credential.username)
+    await Storage.credential.delete(context, credential.username)
 
     if (affectedConnections.length > 0) {
-      await clearConnectionsCredential(context, credential.username)
+      await Storage.connection.clearAllCredential(context, credential.username)
     }
-
-    //vscode.window.showInformationMessage(MESSAGES.credential.deleted(credential.username))
 
     await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)
     await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)

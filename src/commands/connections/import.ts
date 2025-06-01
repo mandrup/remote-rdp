@@ -1,12 +1,12 @@
 import * as vscode from 'vscode'
-import { readConnections, updateConnections } from '../../storage'
+import { Storage } from '../../storage'
 import { ConnectionModel, isConnectionModelArray } from '../../models/connection'
 import { MESSAGES, COMMAND_IDS } from '../../constants'
-import { promptOpenFile } from '../../prompts'
+import { Prompts } from '../../prompts'
 
 export default async function importConnectionsCommand(context: vscode.ExtensionContext): Promise<void> {
   try {
-    const uri = await promptOpenFile({ 'JSON files': ['json'] })
+    const uri = await Prompts.connection.import({ 'JSON files': ['json'] })
     if (!uri) {
       return
     }
@@ -19,13 +19,13 @@ export default async function importConnectionsCommand(context: vscode.Extension
       return
     }
 
-    const existingConnections = readConnections(context)
+    const existingConnections = Storage.connection.readAll(context)
     const importedConnections = json as ConnectionModel[]
-    
+
     const existingConnectionsMap = new Map(existingConnections.map(conn => [conn.id, conn]))
-    
+
     const updatedConnections = existingConnections.slice()
-    
+
     for (const importedConn of importedConnections) {
       const existingConn = existingConnectionsMap.get(importedConn.id)
       if (existingConn) {
@@ -40,8 +40,7 @@ export default async function importConnectionsCommand(context: vscode.Extension
       }
     }
 
-    await updateConnections(context, updatedConnections)
-    //vscode.window.showInformationMessage('Connections imported!')
+    await Storage.connection.updateAll(context, updatedConnections)
 
     await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
   } catch (error) {

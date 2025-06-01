@@ -1,10 +1,10 @@
 import * as vscode from 'vscode'
-import { readConnections } from '../../storage'
+import { Storage } from '../../storage'
 import { MESSAGES } from '../../constants'
 
 export default async function exportConnectionsCommand(context: vscode.ExtensionContext): Promise<void> {
   try {
-    const connections = readConnections(context)
+    const connections = Storage.connection.readAll(context)
     if (!connections.length) {
       vscode.window.showWarningMessage('No connections available.')
       return
@@ -27,7 +27,6 @@ export default async function exportConnectionsCommand(context: vscode.Extension
 
     const content = JSON.stringify(exportedConnections, null, 2)
     await vscode.workspace.fs.writeFile(uri, Buffer.from(content))
-    //vscode.window.showInformationMessage('Connections exported!')
   } catch (error) {
     console.error('Failed to export connections:', error)
     vscode.window.showErrorMessage(MESSAGES.operationFailed('export connections', error))

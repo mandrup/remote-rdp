@@ -1,7 +1,7 @@
 {
   "name": "remote-rdp",
   "publisher": "mandrup",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "displayName": "Remote - RDP",
   "description": "Securely manage and launch Remote Desktop (RDP) sessions from within Visual Studio Code on Windows.",
   "categories": [
@@ -41,14 +41,14 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.15.21",
+    "@types/node": "^22.15.29",
     "@types/vscode": "^1.100.0",
-    "@typescript-eslint/eslint-plugin": "^8.32.1",
-    "@typescript-eslint/parser": "^8.32.1",
-    "@vscode/test-cli": "^0.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
+    "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.4.2",
-    "eslint": "^9.27.0",
+    "eslint": "^9.28.0",
     "mocha": "^11.4.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.3.3"
@@ -112,8 +112,8 @@
           "group": "inline@1"
         },
         {
-          "command": "remote-rdp:connection:connect",
-          "when": "view == remoteRdpConnections && viewItem == connectionItem",
+          "command": "remote-rdp:connection:assignGroupCredentials",
+          "when": "view == remoteRdpConnections && viewItem == connectionGroup",
           "group": "inline@0"
         },
         {
@@ -157,8 +157,12 @@
       {
         "command": "remote-rdp:connection:connect",
         "title": "Connect: RDP Connection",
-        "icon": "$(plug)",
-        "enablement": "!isInDiffEditor"
+        "icon": "$(plug)"
+      },
+      {
+        "command": "remote-rdp:connection:assignGroupCredentials",
+        "title": "Assign Credentials to Group",
+        "icon": "$(key)"
       },
       {
         "command": "remote-rdp:credential:create",

@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 import { PREFIXES, COMMAND_IDS } from '../constants'
 
-suite('constants', () => {
+suite('Constants', () => {
     test('connection command IDs are correct', () => {
         assert.equal(COMMAND_IDS.connection.create, `${PREFIXES.connection}:create`)
         assert.equal(COMMAND_IDS.connection.delete, `${PREFIXES.connection}:delete`)
