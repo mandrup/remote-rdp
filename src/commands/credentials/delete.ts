@@ -1,20 +1,18 @@
 import * as vscode from 'vscode'
 import { Storage } from '../../storage'
-import { MESSAGES, COMMAND_IDS } from '../../constants'
+import { COMMAND_IDS } from '../../constants'
 import { Prompts } from '../../prompts'
 import type { ConnectionModel } from '../../models/connection'
+import { handleCommandError } from '..'
 
-export default async function deleteCredentialCommand(
-  context: vscode.ExtensionContext,
-  item?: vscode.TreeItem
-): Promise<void> {
+export default async function deleteCredentialCommand(context: vscode.ExtensionContext, item?: vscode.TreeItem): Promise<void> {
   try {
-    const credential = await Prompts.credential.editCredentialDetails(context, item)
+    const credential = await Prompts.credential.editDetails(context, item)
     if (!credential) {
       return
     }
 
-    const connections = Storage.connection.readAll(context)
+    const connections = Storage.connection.getAll(context)
     const affectedConnections = connections.filter(
       (conn: ConnectionModel) => conn.credentialUsername === credential.username
     )
@@ -28,9 +26,6 @@ export default async function deleteCredentialCommand(
     await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)
     await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
   } catch (error) {
-    console.error('Failed to remove credential:', error)
-    vscode.window.showErrorMessage(
-      MESSAGES.operationFailed('remove credential', error)
-    )
+    await handleCommandError('remove credential', error)
   }
 }

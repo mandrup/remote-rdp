@@ -1,20 +1,20 @@
 import * as vscode from 'vscode'
 import { Storage } from '../../storage'
-import { MESSAGES } from '../../constants'
+import { Prompts } from '../../prompts'
+import { handleCommandError } from '..'
 
 export default async function exportConnectionsCommand(context: vscode.ExtensionContext): Promise<void> {
   try {
-    const connections = Storage.connection.readAll(context)
+    const connections = Storage.connection.getAll(context)
     if (!connections.length) {
       vscode.window.showWarningMessage('No connections available.')
       return
     }
 
-    const uri = await vscode.window.showSaveDialog({
-      filters: { 'JSON files': ['json'] },
-      defaultUri: vscode.Uri.file('connections.json')
-    })
-
+    const uri = await Prompts.connection.exportFile(
+      vscode.Uri.file('connections.json'),
+      { 'JSON files': ['json'] }
+    )
     if (!uri) {
       return
     }
@@ -26,9 +26,9 @@ export default async function exportConnectionsCommand(context: vscode.Extension
     }))
 
     const content = JSON.stringify(exportedConnections, null, 2)
+
     await vscode.workspace.fs.writeFile(uri, Buffer.from(content))
   } catch (error) {
-    console.error('Failed to export connections:', error)
-    vscode.window.showErrorMessage(MESSAGES.operationFailed('export connections', error))
+    await handleCommandError('export connection', error)
   }
 }

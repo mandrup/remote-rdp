@@ -1,11 +1,9 @@
-export type CredentialId = string
-export type CredentialUsername = string
-export type CredentialPassword = string
-
 export interface CredentialModel {
-    id: CredentialId
-    username: CredentialUsername
-    password: CredentialPassword
+    id: string
+    username: string
+    password: string
+    created_at: string
+    modified_at?: string | undefined
 }
 
 export function isCredentialModel(value: unknown): value is CredentialModel {
@@ -18,7 +16,9 @@ export function isCredentialModel(value: unknown): value is CredentialModel {
 
     const isValid =
         typeof obj.id === 'string' &&
-        typeof obj.username === 'string'
+        typeof obj.username === 'string' &&
+        typeof obj.created_at === 'string' &&
+        (typeof obj.modified_at === 'string' || obj.modified_at === undefined)
 
     if (!isValid) {
         console.warn('Invalid CredentialModel:', value)

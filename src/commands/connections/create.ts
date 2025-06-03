@@ -16,12 +16,12 @@ export default async function createConnectionCommand(context: vscode.ExtensionC
             return
         }
 
-        const credential = await Prompts.credential.credential(context, undefined)
-        if (!credential) {
+        const credentialUsername = await Prompts.credential.select(context, undefined)
+        if (!credentialUsername) {
             return
         }
 
-        await Storage.connection.create(context, hostname, credential, groupResult.value)
+        await Storage.connection.create(context, hostname, credentialUsername, groupResult.value)
 
         await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
         await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)

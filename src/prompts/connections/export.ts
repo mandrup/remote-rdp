@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 
-export default async function exportPrompt(
+export async function promptForExportFile(
     defaultUri?: vscode.Uri,
     filters?: { [name: string]: string[] }
 ): Promise<vscode.Uri | undefined> {

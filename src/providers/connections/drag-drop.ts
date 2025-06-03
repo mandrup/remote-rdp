@@ -7,7 +7,10 @@ export class ConnectionsDragDropController implements vscode.TreeDragAndDropCont
     readonly dragMimeTypes = [MIME_TYPES.connection]
     readonly dropMimeTypes = [MIME_TYPES.connection]
 
-    constructor(private readonly context: vscode.ExtensionContext, private readonly refresh: () => void) { }
+    constructor(
+        private readonly context: vscode.ExtensionContext,
+        private readonly refresh: () => void
+    ) {}
 
     getDragMimeTypes(source: ConnectionTreeItem[]): string[] {
         return source.every(item => item.type === 'connection') ? [MIME_TYPES.connection] : []
@@ -44,17 +47,18 @@ export class ConnectionsDragDropController implements vscode.TreeDragAndDropCont
             .filter((item): item is ConnectionItem => item.type === 'connection')
             .map(item => item.connection)
 
-        if (!draggedConnections.length) { return }
-
-        const allConnections = Storage.connection.readAll(this.context)
-        const updated = allConnections.map(conn =>
-            draggedConnections.some(d => d.id === conn.id)
-                ? { ...conn, group: targetGroup === 'Ungrouped' ? undefined : targetGroup }
-                : conn
-        )
+        if (!draggedConnections.length) {
+            return
+        }
 
         try {
-            await Storage.connection.updateAll(this.context, updated)
+            const allConnections = Storage.connection.getAll(this.context)
+            const updatedConnections = allConnections.map(connection =>
+                draggedConnections.some(d => d.id === connection.id)
+                    ? { ...connection, group: targetGroup === 'Ungrouped' ? undefined : targetGroup }
+                    : connection
+            )
+            await Storage.connection.updateAll(this.context, updatedConnections)
             this.refresh()
         } catch (err) {
             console.error('Failed to update connections:', err)

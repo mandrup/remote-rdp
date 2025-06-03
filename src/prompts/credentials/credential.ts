@@ -11,7 +11,7 @@ export async function credentialPrompt(
   context: vscode.ExtensionContext,
   currentUsername?: string
 ): Promise<string | undefined> {
-  const credentials = await Storage.credential.readAll(context)
+  const credentials = await Storage.credential.getAll(context)
   const items: CredentialQuickPickItem[] = [
     ...credentials
       .map(cred => ({
@@ -21,12 +21,8 @@ export async function credentialPrompt(
         isCurrent: cred.username === currentUsername
       }))
       .sort((a, b) => {
-        if (a.isCurrent) {
-          return -1
-        }
-        if (b.isCurrent) {
-          return 1
-        }
+        if (a.isCurrent) { return -1 }
+        if (b.isCurrent) { return 1 }
         return a.label.localeCompare(b.label)
       }),
     {
@@ -40,15 +36,11 @@ export async function credentialPrompt(
     matchOnDescription: true
   })
 
-  if (!selected) {
-    return undefined
-  }
+  if (!selected) { return undefined }
 
   if (selected.isCreateNew) {
-    const details = await Prompts.credential.credentialDetails()
-    if (!details) {
-      return undefined
-    }
+    const details = await Prompts.credential.details()
+    if (!details) { return undefined }
     await Storage.credential.create(context, details.username, details.password)
     return details.username
   }
@@ -64,18 +56,14 @@ export async function credentialDetailsPrompt(
     value: currentUsername,
     placeHolder: 'Enter username'
   })
-  if (!username) {
-    return undefined
-  }
+  if (!username) { return undefined }
 
   const password = await vscode.window.showInputBox({
     prompt: currentUsername ? 'Enter new password' : 'Enter password',
     password: true,
     placeHolder: 'Enter password'
   })
-  if (!password) {
-    return undefined
-  }
+  if (!password) { return undefined }
 
   return { username, password }
 }
@@ -84,7 +72,7 @@ export async function editCredentialDetailsPrompt(
   context: vscode.ExtensionContext,
   item?: vscode.TreeItem
 ): Promise<{ id: string; username: string; password: string } | undefined> {
-  const credentials = await Storage.credential.readAll(context)
+  const credentials = await Storage.credential.getAll(context)
 
   if (item?.contextValue === 'emptyCredentials') {
     return undefined

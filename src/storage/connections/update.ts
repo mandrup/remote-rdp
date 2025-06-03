@@ -10,9 +10,7 @@ export async function updateConnections(
     if (!isConnectionModelArray(connections)) {
         throw new Error('Invalid connection data array')
     }
-
     await context.globalState.update(PREFIXES.connection, connections)
-
     const stored = context.globalState.get<unknown>(PREFIXES.connection)
     if (!isConnectionModelArray(stored)) {
         throw new Error('Stored connection data is invalid after update')
@@ -24,22 +22,26 @@ export async function updateConnectionsCredential(
     oldUsername: string,
     newUsername: string
 ): Promise<void> {
-    const connections = Storage.connection.readAll(context)
-    const updated = connections.map(connection =>
-        connection.credentialUsername === oldUsername ? { ...connection, credentialUsername: newUsername } : connection
+    const connections = Storage.connection.getAll(context)
+    const updatedConnections = connections.map((connection: ConnectionModel) =>
+        connection.credentialUsername === oldUsername
+            ? { ...connection, credentialUsername: newUsername }
+            : connection
     )
-    await updateConnections(context, updated)
+    await updateConnections(context, updatedConnections)
 }
 
 export async function clearConnectionsCredential(
     context: vscode.ExtensionContext,
     username: string
 ): Promise<number> {
-    const connections = Storage.connection.readAll(context)
-    const affectedCount = connections.filter(connection => connection.credentialUsername === username).length
-    const updated = connections.map(connection =>
-        connection.credentialUsername === username ? { ...connection, credentialUsername: undefined } : connection
+    const connections = Storage.connection.getAll(context)
+    const affectedCount = connections.filter((connection: ConnectionModel) => connection.credentialUsername === username).length
+    const updatedConnections = connections.map((connection: ConnectionModel) =>
+        connection.credentialUsername === username
+            ? { ...connection, credentialUsername: undefined }
+            : connection
     )
-    await updateConnections(context, updated)
+    await updateConnections(context, updatedConnections)
     return affectedCount
 }

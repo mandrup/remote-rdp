@@ -10,7 +10,6 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
 
     constructor(protected readonly context: vscode.ExtensionContext) {
         super()
-
         if (!process.env.VSCODE_TEST) {
             context.subscriptions.push(
                 vscode.commands.registerCommand(COMMAND_IDS.connection.refresh, () => this.refresh())
@@ -25,7 +24,7 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
 
     async getChildren(element?: ConnectionTreeItem): Promise<ConnectionTreeItem[]> {
         try {
-            const connections = Storage.connection.readAll(this.context)
+            const connections = Storage.connection.getAll(this.context)
 
             if (element) {
                 if (element.type === 'group') {
@@ -68,7 +67,6 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
         item.contextValue = 'connectionItem'
         item.iconPath = new vscode.ThemeIcon('remote')
         item.description = connection.credentialUsername ?? 'No credential assigned'
-
         item.command = {
             command: 'remote-rdp:connection:connect',
             title: 'Connect',
@@ -76,7 +74,6 @@ export class ConnectionsProvider extends BaseProvider<ConnectionTreeItem> implem
         }
         return item
     }
-
 
     protected createGroupItem(group: string, connections: ConnectionModel[]): ConnectionGroupItem {
         const item = new vscode.TreeItem(group, vscode.TreeItemCollapsibleState.Expanded) as ConnectionGroupItem

@@ -34,24 +34,24 @@
     "build": "npm run clean && tsc -p ./",
     "watch": "tsc -w -p ./",
     "lint": "eslint src",
-    "test": "node ./out/test/runTest.js",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest",
     "pretest": "npm run build",
     "package": "vsce package",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.10",
     "@types/node": "^22.15.29",
     "@types/vscode": "^1.100.0",
-    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/eslint-plugin": "^8.33.1",
     "@typescript-eslint/parser": "^8.33.0",
-    "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2",
+    "@vitest/ui": "^3.2.1",
     "@vscode/vsce": "^3.4.2",
     "eslint": "^9.28.0",
-    "mocha": "^11.4.0",
     "rimraf": "^6.0.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.0"
   },
   "contributes": {
     "viewsContainers": {

@@ -27,12 +27,13 @@ export class CredentialsProvider extends BaseProvider<CredentialTreeItem> {
         }
 
         try {
-            const credentials = await Storage.credential.readAll(this.context)
-            return credentials.length
-                ? credentials
-                    .sort((a, b) => a.username.localeCompare(b.username))
-                    .map(c => this.createCredentialItem(c))
-                : [this.createEmptyItem()]
+            const credentials = await Storage.credential.getAll(this.context)
+            if (credentials.length === 0) {
+                return [this.createEmptyItem()]
+            }
+            return credentials
+                .sort((a, b) => a.username.localeCompare(b.username))
+                .map(c => this.createCredentialTreeItem(c))
         } catch (error) {
             console.error('Failed to get credentials:', error)
             vscode.window.showErrorMessage('Failed to load credentials.')
@@ -40,7 +41,7 @@ export class CredentialsProvider extends BaseProvider<CredentialTreeItem> {
         }
     }
 
-    private createCredentialItem(credential: CredentialModel): CredentialItem {
+    private createCredentialTreeItem(credential: CredentialModel): CredentialItem {
         const item = new vscode.TreeItem(credential.username, vscode.TreeItemCollapsibleState.None) as CredentialItem
         item.id = credential.id
         item.type = 'credential'
@@ -58,4 +59,4 @@ export class CredentialsProvider extends BaseProvider<CredentialTreeItem> {
         item.iconPath = new vscode.ThemeIcon('info')
         return item
     }
-} 
+}
