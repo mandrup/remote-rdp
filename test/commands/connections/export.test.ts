@@ -1,13 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import * as vscode from 'vscode'
 import exportConnectionsCommand from '../../../src/commands/connections/export'
 
-// --- Mocks ---
 vi.mock('vscode', () => {
   const fs = { writeFile: vi.fn() }
   return {
     commands: { executeCommand: vi.fn() },
-    window: { showWarningMessage: vi.fn(), showInputBox: vi.fn() },
+    window: {
+      showWarningMessage: vi.fn(),
+      showInputBox: vi.fn(),
+      showErrorMessage: vi.fn()
+    },
     workspace: { fs },
     Uri: { file: (path: string) => ({ path }) }
   }
@@ -44,7 +47,7 @@ vi.mock('../../../src/commands/connections', () => ({
 describe('exportConnectionsCommand', () => {
   const context = {} as any
   let __mockExportFilePrompt: any, __mockGetAll: any, mockHandleCommandError: any
-  let mockWriteFile: any
+  let mockWriteFile: any, mockShowWarningMessage: any
 
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -55,6 +58,13 @@ describe('exportConnectionsCommand', () => {
     // @ts-expect-error: mock property only exists in test
     mockHandleCommandError = (await import('../../../src/commands/connections')).handleCommandError
     mockWriteFile = (vscode.workspace.fs.writeFile as any)
+    mockShowWarningMessage = vi.spyOn(vscode.window, 'showWarningMessage').mockResolvedValue(undefined)
+  })
+
+  afterEach(() => {
+    if (mockShowWarningMessage && typeof mockShowWarningMessage.mockRestore === 'function') {
+      mockShowWarningMessage.mockRestore()
+    }
   })
 
   it('exports connections to file', async () => {

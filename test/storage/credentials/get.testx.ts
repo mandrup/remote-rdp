@@ -1,11 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import * as vscode from 'vscode'
 import {
   getAllCredentials,
   getCredentialWithPassword,
   getAllCredentialUsernames
 } from '../../../src/storage/credentials/get'
-import { PREFIXES } from '../../../src/constants'
 
 vi.mock('vscode', () => ({
     window: {
@@ -70,27 +68,33 @@ describe('getAllCredentials', () => {
 })
 
 describe('getCredentialWithPassword', () => {
-    const context = { globalState: {}, secrets: {} } as any
-    beforeEach(() => {
+    let spy: any
+    let context: any
+    beforeEach(async () => {
         vi.clearAllMocks()
+        context = { globalState: { get: vi.fn() }, secrets: {} }
+        const mod = await import('../../../src/storage/credentials/get')
+        spy = vi.spyOn(mod, 'getAllCredentials')
     })
-    afterEach(() => {})
+    afterEach(() => {
+        if (spy?.mockRestore) { spy.mockRestore() }
+    })
     it('returns username and password if found', async () => {
-        vi.spyOn(require('../../../src/storage/credentials/get'), 'getAllCredentials').mockResolvedValue([
+        spy.mockResolvedValue([
             { id: '1', username: 'u1', password: 'p1', created_at: '2025-06-03T12:00:00.000Z' }
         ])
         const result = await getCredentialWithPassword(context, 'u1')
         expect(result).toEqual({ username: 'u1', password: 'p1' })
     })
     it('returns undefined if not found', async () => {
-        vi.spyOn(require('../../../src/storage/credentials/get'), 'getAllCredentials').mockResolvedValue([
+        spy.mockResolvedValue([
             { id: '1', username: 'u1', password: 'p1', created_at: '2025-06-03T12:00:00.000Z' }
         ])
         const result = await getCredentialWithPassword(context, 'u2')
         expect(result).toBeUndefined()
     })
     it('returns undefined if password is missing', async () => {
-        vi.spyOn(require('../../../src/storage/credentials/get'), 'getAllCredentials').mockResolvedValue([
+        spy.mockResolvedValue([
             { id: '1', username: 'u1', password: '', created_at: '2025-06-03T12:00:00.000Z' }
         ])
         const result = await getCredentialWithPassword(context, 'u1')
@@ -99,13 +103,19 @@ describe('getCredentialWithPassword', () => {
 })
 
 describe('getAllCredentialUsernames', () => {
-    const context = { globalState: {}, secrets: {} } as any
-    beforeEach(() => {
+    let spy: any
+    let context: any
+    beforeEach(async () => {
         vi.clearAllMocks()
+        context = { globalState: { get: vi.fn() }, secrets: {} }
+        const mod = await import('../../../src/storage/credentials/get')
+        spy = vi.spyOn(mod, 'getAllCredentials')
     })
-    afterEach(() => {})
+    afterEach(() => {
+        if (spy?.mockRestore) { spy.mockRestore() }
+    })
     it('returns all usernames', async () => {
-        vi.spyOn(require('../../../src/storage/credentials/get'), 'getAllCredentials').mockResolvedValue([
+        spy.mockResolvedValue([
             { id: '1', username: 'u1', password: 'p1', created_at: '2025-06-03T12:00:00.000Z' },
             { id: '2', username: 'u2', password: 'p2', created_at: '2025-06-03T12:00:00.000Z' }
         ])
@@ -113,7 +123,7 @@ describe('getAllCredentialUsernames', () => {
         expect(result).toEqual(['u1', 'u2'])
     })
     it('returns empty array if no credentials', async () => {
-        vi.spyOn(require('../../../src/storage/credentials/get'), 'getAllCredentials').mockResolvedValue([])
+        spy.mockResolvedValue([])
         const result = await getAllCredentialUsernames(context)
         expect(result).toEqual([])
     })

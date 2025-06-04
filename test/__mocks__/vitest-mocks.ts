@@ -12,10 +12,10 @@ vi.mock('vscode', () => ({
 }));
 
 // Storage mock
+export const mockCreate = vi.fn();
+export const mockGetAll = vi.fn();
+export const mockUpdateAll = vi.fn();
 vi.mock('../../../src/storage', () => {
-  const mockCreate = vi.fn();
-  const mockGetAll = vi.fn();
-  const mockUpdateAll = vi.fn();
   return {
     Storage: {
       connection: {
@@ -58,3 +58,22 @@ vi.mock('../../../src/prompts', () => {
 vi.mock('../../../src/commands/connections', () => ({
   handleCommandError: vi.fn(),
 }));
+
+// Patch: define and export the mocks at the top-level so they're always shared
+export const mockIsConnectionModelArray = vi.fn();
+export const mockIsConnectionModel = vi.fn();
+vi.mock('../../../src/models/connection', () => {
+  return {
+    isConnectionModelArray: mockIsConnectionModelArray,
+    __mockIsConnectionModelArray: mockIsConnectionModelArray,
+    isConnectionModel: mockIsConnectionModel,
+    __mockIsConnectionModel: mockIsConnectionModel,
+    // ESM compatibility: add all mocks to default export as well
+    default: {
+      isConnectionModelArray: mockIsConnectionModelArray,
+      __mockIsConnectionModelArray: mockIsConnectionModelArray,
+      isConnectionModel: mockIsConnectionModel,
+      __mockIsConnectionModel: mockIsConnectionModel,
+    }
+  }
+})

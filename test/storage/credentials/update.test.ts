@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import * as vscode from 'vscode'
 import { updateCredential } from '../../../src/storage/credentials/update'
 import { PREFIXES } from '../../../src/constants'
 
