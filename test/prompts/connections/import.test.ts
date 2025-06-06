@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import * as vscode from 'vscode'
-import { promptForImportFile } from '../../../src/prompts/connections/import'
+import '#mocks/vscode'
+import { mockShowOpenDialog } from '#mocks/vscode'
+import { promptForImportFile } from '@/prompts/connections/import'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 const mockUri = {
   fsPath: '/file.json',
@@ -22,38 +23,14 @@ const mockChosenUri = {
   toJSON: () => ({}),
 }
 
-vi.mock('vscode', () => ({
-  window: {
-    showOpenDialog: vi.fn(),
-    showWarningMessage: vi.fn(),
-    showQuickPick: vi.fn(),
-    showInputBox: vi.fn(),
-  },
-  Uri: {
-    file: (path: string) => ({
-      ...mockUri,
-      fsPath: path,
-      path,
-      toString: () => path,
-      with: () => mockUri,
-      toJSON: () => ({}),
-    }),
-  },
-  TreeItem: class {},
-}))
-
 describe('promptForImportFile', () => {
-  let mockShowOpenDialog: any
-
   beforeEach(() => {
     vi.clearAllMocks()
-    mockShowOpenDialog = vi.spyOn(vscode.window, 'showOpenDialog').mockResolvedValue([mockUri])
+    mockShowOpenDialog.mockResolvedValue([mockUri])
   })
 
   afterEach(() => {
-    if (mockShowOpenDialog && typeof mockShowOpenDialog.mockRestore === 'function') {
-      mockShowOpenDialog.mockRestore()
-    }
+    mockShowOpenDialog.mockReset()
   })
 
   it('calls showOpenDialog with correct options', async () => {

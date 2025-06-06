@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { isConnectionModel, isConnectionModelArray, ConnectionModel } from '../../src/models/connection'
+import { isConnectionModel, isConnectionModelArray, ConnectionModel } from '@/models/connection'
 
 describe('isConnectionModel', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>

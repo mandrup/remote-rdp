@@ -10,12 +10,12 @@
 		"rootDir": "src",
 		"strict": true,
 		"skipLibCheck": true,
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"baseUrl": ".",
+		"paths": {
+		"#mocks/*": ["test/__mocks__/*"],
+		"@/*": ["src/*"]
+		}
 	},
-	"exclude": [
-		"node_modules",
-		".vscode-test",
-		"vitest.config.ts",
-		"test"
-	]
+	"include": ["src", "test"]
 }

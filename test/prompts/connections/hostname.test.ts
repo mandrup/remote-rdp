@@ -1,25 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import * as vscode from 'vscode'
-import promptForHostname from '../../../src/prompts/connections/hostname'
+import '#mocks/vscode'
+import { mockShowInputBox } from '#mocks/vscode'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import promptForHostname from '@/prompts/connections/hostname'
 
-vi.mock('vscode', () => ({
-  window: {
-    showInputBox: vi.fn(),
-  },
-}))
 
 describe('promptForHostname', () => {
-  let mockShowInputBox: any
-
   beforeEach(() => {
     vi.clearAllMocks()
-    mockShowInputBox = vi.spyOn(vscode.window, 'showInputBox').mockResolvedValue('host')
   })
 
   afterEach(() => {
-    if (mockShowInputBox && typeof mockShowInputBox.mockRestore === 'function') {
-      mockShowInputBox.mockRestore()
-    }
+    mockShowInputBox.mockReset()
   })
 
   it('shows input box with correct prompt for new hostname', async () => {

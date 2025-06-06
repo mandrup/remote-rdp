@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { isCredentialModel, isCredentialModelArray, CredentialModel } from '../../src/models/credential'
+import { isCredentialModel, isCredentialModelArray, CredentialModel } from '@/models/credential'
 
 describe('isCredentialModel', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>
@@ -12,7 +12,7 @@ describe('isCredentialModel', () => {
 
   it('returns true for a valid CredentialModel', () => {
     const valid: CredentialModel = {
-      id: '1',
+      id: crypto.randomUUID(),
       username: 'user',
       password: 'pass',
       created_at: '2024-01-01',
@@ -24,7 +24,7 @@ describe('isCredentialModel', () => {
 
   it('returns true for a valid CredentialModel with minimal fields', () => {
     const valid: CredentialModel = {
-      id: '1',
+      id: crypto.randomUUID(),
       username: 'user',
       password: 'pass',
       created_at: '2024-01-01',
@@ -66,8 +66,8 @@ describe('isCredentialModelArray', () => {
 
   it('returns true for an array of valid CredentialModels', () => {
     const arr: CredentialModel[] = [
-      { id: '1', username: 'u', password: 'p', created_at: '2024-01-01' },
-      { id: '2', username: 'u2', password: 'p2', created_at: '2024-01-02' }
+      { id: crypto.randomUUID(), username: 'u', password: 'p', created_at: '2024-01-01' },
+      { id: crypto.randomUUID(), username: 'u2', password: 'p2', created_at: '2024-01-02' }
     ]
     expect(isCredentialModelArray(arr)).toBe(true)
     expect(warnSpy).not.toHaveBeenCalled()
@@ -82,8 +82,8 @@ describe('isCredentialModelArray', () => {
 
   it('returns false if any element is not a valid CredentialModel', () => {
     const arr = [
-      { id: '1', username: 'u', password: 'p', created_at: '2024-01-01' },
-      { id: 2, username: 'u2', password: 'p2', created_at: '2024-01-02' }
+      { id: crypto.randomUUID(), username: 'u', password: 'p', created_at: '2024-01-01' },
+      { id: -1, username: 'u2', password: 'p2', created_at: '2024-01-02' }
     ]
     expect(isCredentialModelArray(arr)).toBe(false)
     expect(warnSpy).toHaveBeenCalled()

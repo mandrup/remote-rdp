@@ -22,7 +22,7 @@ export async function updateConnectionsCredential(
     oldUsername: string,
     newUsername: string
 ): Promise<void> {
-    const connections = Storage.connection.getAll(context)
+    const connections = Storage.connection.getAll(context) || []
     const updatedConnections = connections.map((connection: ConnectionModel) =>
         connection.credentialUsername === oldUsername
             ? { ...connection, credentialUsername: newUsername }
@@ -35,7 +35,7 @@ export async function clearConnectionsCredential(
     context: vscode.ExtensionContext,
     username: string
 ): Promise<number> {
-    const connections = Storage.connection.getAll(context)
+    const connections = Storage.connection.getAll(context) || []
     const affectedCount = connections.filter((connection: ConnectionModel) => connection.credentialUsername === username).length
     const updatedConnections = connections.map((connection: ConnectionModel) =>
         connection.credentialUsername === username

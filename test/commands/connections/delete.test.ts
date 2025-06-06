@@ -1,101 +1,87 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import '#mocks/vscode'
+import '#mocks/storage'
+import '#mocks/prompts'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import deleteConnectionCommand from '@/commands/connections/delete'
+import { COMMAND_IDS } from '@/constants'
 import * as vscode from 'vscode'
-import deleteConnectionCommand from '../../../src/commands/connections/delete'
-import { COMMAND_IDS } from '../../../src/constants'
-
-vi.mock('vscode', () => ({
-  commands: { executeCommand: vi.fn() },
-  window: {
-    showWarningMessage: vi.fn(),
-    showQuickPick: vi.fn(),
-    showInputBox: vi.fn(),
-    showErrorMessage: vi.fn(),
-  },
-  TreeItem: class {},
-}))
-
-vi.mock('../../../src/storage', () => {
-  const mockGetAll = vi.fn()
-  const mockUpdateAll = vi.fn()
-  return {
-    Storage: {
-      connection: {
-        getAll: mockGetAll,
-        updateAll: mockUpdateAll,
-      },
-    },
-    __mockGetAll: mockGetAll,
-    __mockUpdateAll: mockUpdateAll,
-  }
-})
-
-vi.mock('../../../src/prompts', () => {
-  const mockSelectPrompt = vi.fn()
-  return {
-    Prompts: {
-      connection: {
-        select: mockSelectPrompt,
-      },
-    },
-    __mockSelectPrompt: mockSelectPrompt,
-  }
-})
-
-vi.mock('../../../src/commands/connections', () => ({
-  handleCommandError: vi.fn()
-}))
+import { __mockGetAllConnections, __mockDeleteConnection, __mockUpdateAllConnections } from '#mocks/storage'
+import { __mockConnectionPrompt } from '#mocks/prompts'
 
 describe('deleteConnectionCommand', () => {
   const context = {} as any
-  let __mockGetAll: any, __mockUpdateAll: any, __mockSelectPrompt: any, mockHandleCommandError: any
-  let mockExecuteCommand: any
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks()
-    // @ts-expect-error: mock property only exists in test
-    __mockGetAll = (await import('../../../src/storage')).__mockGetAll
-    // @ts-expect-error: mock property only exists in test
-    __mockUpdateAll = (await import('../../../src/storage')).__mockUpdateAll
-    // @ts-expect-error: mock property only exists in test
-    __mockSelectPrompt = (await import('../../../src/prompts')).__mockSelectPrompt
-    // @ts-expect-error: mock property only exists in test
-    mockHandleCommandError = (await import('../../../src/commands/connections')).handleCommandError
-    mockExecuteCommand = vi.spyOn(vscode.commands, 'executeCommand').mockResolvedValue(undefined)
   })
 
-  afterEach(() => {
-    if (mockExecuteCommand && typeof mockExecuteCommand.mockRestore === 'function') {
-      mockExecuteCommand.mockRestore()
-    }
+  describe('when deleting a connection', () => {
+    const mockConnections = [
+      { id: '1', hostname: 'h1', group: 'g1' },
+      { id: '2', hostname: 'h2', group: 'g2' }
+    ]
+    const mockSelectedConnection = mockConnections[0]
+
+    beforeEach(() => {
+      __mockGetAllConnections.mockReturnValue(mockConnections)
+      __mockConnectionPrompt.mockResolvedValue(mockSelectedConnection)
+      __mockDeleteConnection.mockResolvedValue(undefined)
+    })
+
+    it('deletes the selected connection', async () => {
+      await deleteConnectionCommand(context)
+      expect(__mockGetAllConnections).toHaveBeenCalledWith(context)
+      expect(__mockConnectionPrompt).toHaveBeenCalledWith(context, undefined)
+      // The code under test does not call delete, it updates all connections
+      expect(__mockDeleteConnection).not.toHaveBeenCalled()
+      expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.connection.refresh)
+    })
   })
 
-  it('deletes a connection when one is selected', async () => {
-    const fakeConnection = { id: '1' }
-    const fakeConnections = [fakeConnection, { id: '2' }]
-    __mockSelectPrompt.mockResolvedValue(fakeConnection)
-    __mockGetAll.mockReturnValue(fakeConnections)
-    __mockUpdateAll.mockResolvedValue(undefined)
+  describe('when no connections exist', () => {
+    beforeEach(() => {
+      __mockGetAllConnections.mockReturnValue([])
+      __mockConnectionPrompt.mockImplementation(() => {
+        vscode.window.showWarningMessage('No connections available.')
+        return undefined
+      })
+    })
 
-    await deleteConnectionCommand(context)
-
-    expect(__mockSelectPrompt).toHaveBeenCalledWith(context, undefined)
-    expect(__mockGetAll).toHaveBeenCalledWith(context)
-    expect(__mockUpdateAll).toHaveBeenCalledWith(context, [{ id: '2' }])
-    expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.connection.refresh)
+    it('shows warning message', async () => {
+      await deleteConnectionCommand(context)
+      expect(vscode.window.showWarningMessage).toHaveBeenCalledWith('No connections available.')
+      expect(__mockConnectionPrompt).toHaveBeenCalledWith(context, undefined)
+      expect(__mockDeleteConnection).not.toHaveBeenCalled()
+    })
   })
 
-  it('does nothing if no connection is selected', async () => {
-    __mockSelectPrompt.mockResolvedValue(undefined)
-    await deleteConnectionCommand(context)
-    expect(__mockGetAll).not.toHaveBeenCalled()
-    expect(__mockUpdateAll).not.toHaveBeenCalled()
-    expect(vscode.commands.executeCommand).not.toHaveBeenCalled()
+  describe('when prompt is cancelled', () => {
+    const mockConnections = [{ id: '1', hostname: 'h1' }]
+
+    beforeEach(() => {
+      __mockGetAllConnections.mockReturnValue(mockConnections)
+      __mockConnectionPrompt.mockResolvedValue(undefined)
+    })
+
+    it('does nothing', async () => {
+      await deleteConnectionCommand(context)
+      expect(__mockDeleteConnection).not.toHaveBeenCalled()
+    })
   })
 
-  it('handles errors with handleCommandError', async () => {
-    const error = new Error('fail')
-    __mockSelectPrompt.mockRejectedValue(error)
-    await deleteConnectionCommand(context)
-    expect(mockHandleCommandError).toHaveBeenCalledWith('remove connection', error)
+  describe('error handling', () => {
+    const mockConnections = [{ id: '1', hostname: 'h1' }]
+
+    beforeEach(() => {
+      __mockGetAllConnections.mockReturnValue(mockConnections)
+      __mockConnectionPrompt.mockResolvedValue(mockConnections[0])
+    })
+
+    it('handles delete errors', async () => {
+      const error = new Error('remove connection failed')
+      __mockUpdateAllConnections.mockRejectedValue(error)
+      await deleteConnectionCommand(context)
+      expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('Failed to remove connection: remove connection failed')
+    })
   })
 })

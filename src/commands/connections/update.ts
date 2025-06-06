@@ -23,6 +23,9 @@ export async function updateConnectionCommand(context: vscode.ExtensionContext, 
         }
 
         const credentialUsername = await Prompts.credential.select(context, connection.credentialUsername)
+        if (credentialUsername === undefined) {
+            return
+        }
 
         const connections = Storage.connection.getAll(context)
 

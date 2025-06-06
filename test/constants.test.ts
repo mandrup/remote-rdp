@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { PREFIXES, COMMAND_IDS, MESSAGES, MIME_TYPES } from '../src/constants'
+import { PREFIXES, COMMAND_IDS, MESSAGES, MIME_TYPES } from '@/constants'
 
 describe('constants', () => {
   it('PREFIXES are correct', () => {

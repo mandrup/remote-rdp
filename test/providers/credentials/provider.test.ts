@@ -1,49 +1,17 @@
+import '#mocks/vscode'
+import '#mocks/storage'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { CredentialsProvider } from '@/providers/credentials/provider'
+import { __mockGetAllCredentials } from '#mocks/storage'
 import * as vscode from 'vscode'
-import { CredentialsProvider } from '../../../src/providers/credentials/provider'
-
-vi.mock('vscode', () => ({
-    window: {
-        showWarningMessage: vi.fn(),
-        showQuickPick: vi.fn(),
-        showInputBox: vi.fn(),
-        showErrorMessage: vi.fn(),
-    },
-    commands: {
-        registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
-    },
-    ThemeIcon: class { constructor(public id: string) {} },
-    TreeItem: class { label: string; collapsibleState: any; id: string | undefined; type: string | undefined; contextValue: string | undefined; iconPath: any; credential?: any; constructor(label: string, collapsibleState: any) { this.label = label; this.collapsibleState = collapsibleState; } },
-    TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
-    EventEmitter: class<T> {
-        private listeners: Array<(e: T) => any> = [];
-        fire(event: T) { this.listeners.forEach(fn => fn(event)); }
-        event = (listener: (e: T) => any) => { this.listeners.push(listener); return { dispose: () => {} }; };
-        dispose() { this.listeners = []; }
-    },
-}))
-
-vi.mock('../../../src/storage', () => {
-    const mockGetAll = vi.fn()
-    return {
-        Storage: {
-            credential: {
-                getAll: mockGetAll,
-            },
-        },
-        __mockGetAll: mockGetAll,
-    }
-})
 
 describe('CredentialsProvider', () => {
     const context = { subscriptions: { push: vi.fn() } } as any
     let provider: CredentialsProvider
-    let __mockGetAll: any, mockShowErrorMessage: any, mockShowQuickPick: any, mockShowInputBox: any
+    let mockShowErrorMessage: any, mockShowQuickPick: any, mockShowInputBox: any
 
-    beforeEach(async () => {
+    beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-expect-error: mock property only exists in test
-        __mockGetAll = (await import('../../../src/storage')).__mockGetAll
         mockShowErrorMessage = vi.spyOn(vscode.window, 'showErrorMessage').mockResolvedValue(undefined)
         mockShowQuickPick = vi.spyOn(vscode.window, 'showQuickPick').mockResolvedValue(undefined)
         mockShowInputBox = vi.spyOn(vscode.window, 'showInputBox').mockResolvedValue(undefined)
@@ -68,7 +36,7 @@ describe('CredentialsProvider', () => {
     })
 
     it('returns empty item if no credentials', async () => {
-        __mockGetAll.mockResolvedValue([])
+        __mockGetAllCredentials.mockResolvedValue([])
         const children = await provider.getChildren()
         expect(children).toHaveLength(1)
         expect(children[0].type).toBe('empty')
@@ -80,7 +48,7 @@ describe('CredentialsProvider', () => {
             { id: '2', username: 'b', password: 'p', created_at: 'd' },
             { id: '1', username: 'a', password: 'p', created_at: 'd' },
         ]
-        __mockGetAll.mockResolvedValue(credentials)
+        __mockGetAllCredentials.mockResolvedValue(credentials)
         const children = await provider.getChildren()
         expect(children).toHaveLength(2)
         expect(children[0].label).toBe('a')
@@ -90,13 +58,13 @@ describe('CredentialsProvider', () => {
     })
 
     it('returns [] for non-root element', async () => {
-        __mockGetAll.mockResolvedValue([{ id: '1', username: 'a', password: 'p', created_at: 'd' }])
+        __mockGetAllCredentials.mockResolvedValue([{ id: '1', username: 'a', password: 'p', created_at: 'd' }])
         const result = await provider.getChildren({ type: 'credential' } as any)
         expect(result).toEqual([])
     })
 
     it('handles errors and shows error message', async () => {
-        __mockGetAll.mockImplementation(() => { throw new Error('fail') })
+        __mockGetAllCredentials.mockImplementation(() => { throw new Error('fail') })
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
         const result = await provider.getChildren()
         expect(result).toEqual([])

@@ -1,59 +1,23 @@
+import '#mocks/vscode'
+import '#mocks/storage'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { ConnectionsDragDropController } from '@/providers/connections/drag-drop'
+import { MIME_TYPES } from '@/constants'
+import { __mockGetAllConnections, __mockUpdateAllConnections } from '#mocks/storage'
 import * as vscode from 'vscode'
-import { ConnectionsDragDropController } from '../../../src/providers/connections/drag-drop'
-import { MIME_TYPES } from '../../../src/constants'
-
-vi.mock('vscode', () => ({
-    window: {
-        showWarningMessage: vi.fn(),
-        showQuickPick: vi.fn(),
-        showInputBox: vi.fn(),
-        showErrorMessage: vi.fn(),
-    },
-    DataTransfer: class {
-        private map = new Map()
-        get(type: string) { return this.map.get(type) }
-        set(type: string, item: any) { this.map.set(type, item) }
-    },
-    DataTransferItem: class {
-        constructor(private value: string) {}
-        async asString() { return this.value }
-    },
-    CancellationToken: class {
-        isCancellationRequested = false
-    },
-    TreeItem: class {},
-}))
-
-vi.mock('../../../src/storage', () => {
-    const mockGetAll = vi.fn()
-    const mockUpdateAll = vi.fn()
-    return {
-        Storage: {
-            connection: {
-                getAll: mockGetAll,
-                updateAll: mockUpdateAll,
-            },
-        },
-        __mockGetAll: mockGetAll,
-        __mockUpdateAll: mockUpdateAll,
-    }
-})
 
 describe('ConnectionsDragDropController', () => {
     const context = {} as any
     let refresh: any, controller: ConnectionsDragDropController
-    let __mockGetAll: any, __mockUpdateAll: any, mockShowErrorMessage: any
+    let mockShowErrorMessage: any, __mockGetAll: any, __mockUpdateAll: any
 
-    beforeEach(async () => {
+    beforeEach(() => {
         vi.clearAllMocks()
         refresh = vi.fn()
         controller = new ConnectionsDragDropController(context, refresh)
-        // @ts-expect-error: mock property only exists in test
-        __mockGetAll = (await import('../../../src/storage')).__mockGetAll
-        // @ts-expect-error: mock property only exists in test
-        __mockUpdateAll = (await import('../../../src/storage')).__mockUpdateAll
         mockShowErrorMessage = vi.spyOn(vscode.window, 'showErrorMessage').mockResolvedValue(undefined)
+        __mockGetAll = __mockGetAllConnections
+        __mockUpdateAll = __mockUpdateAllConnections
     })
 
     afterEach(() => {

@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import * as vscode from 'vscode'
-import { promptForExportFile } from '../../../src/prompts/connections/export'
+import '#mocks/vscode'
+import { mockShowSaveDialog } from '#mocks/vscode'
+import { promptForExportFile } from '@/prompts/connections/export'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 const mockUri = {
   fsPath: '/file.json',
@@ -30,38 +31,14 @@ const mockChosenUri = {
   toJSON: () => ({}),
 }
 
-vi.mock('vscode', () => ({
-  window: {
-    showSaveDialog: vi.fn(),
-    showWarningMessage: vi.fn(),
-    showQuickPick: vi.fn(),
-    showInputBox: vi.fn(),
-  },
-  Uri: {
-    file: (path: string) => ({
-      ...mockUri,
-      fsPath: path,
-      path,
-      toString: () => path,
-      with: () => mockUri,
-      toJSON: () => ({}),
-    }),
-  },
-  TreeItem: class {},
-}))
-
 describe('promptForExportFile', () => {
-  let mockShowSaveDialog: any
-
   beforeEach(() => {
     vi.clearAllMocks()
-    mockShowSaveDialog = vi.spyOn(vscode.window, 'showSaveDialog').mockResolvedValue(mockUri)
+    mockShowSaveDialog.mockResolvedValue(mockUri)
   })
 
   afterEach(() => {
-    if (mockShowSaveDialog && typeof mockShowSaveDialog.mockRestore === 'function') {
-      mockShowSaveDialog.mockRestore()
-    }
+    mockShowSaveDialog.mockReset()
   })
 
   it('calls showSaveDialog with provided filters and defaultUri', async () => {
