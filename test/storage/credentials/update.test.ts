@@ -1,6 +1,6 @@
 import '#mocks/vscode'
 import '#mocks/storage'
-import { __mockGetAllCredentials } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { updateCredential } from '@/storage/credentials/update'
 import { PREFIXES } from '@/constants'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
@@ -39,7 +39,7 @@ describe('updateCredential', () => {
       { id: '1', username: 'old', password: 'p', created_at: 'd', modified_at: undefined },
       { id: '2', username: 'other', password: 'p2', created_at: 'd2', modified_at: undefined }
     ]
-    __mockGetAllCredentials.mockResolvedValue(credentials)
+    __mockStorage.credential.getAll.mockResolvedValue(credentials)
     await updateCredential(context, '1', 'new', 'newpass')
     expect(mockUpdate).toHaveBeenCalledWith(PREFIXES.credential, [
       { id: '1', username: 'new', created_at: 'd', modified_at: now },
@@ -49,14 +49,14 @@ describe('updateCredential', () => {
   })
 
   it('throws if credential id not found', async () => {
-    __mockGetAllCredentials.mockResolvedValue([{ id: '2', username: 'other', password: 'p2', created_at: 'd2', modified_at: undefined }])
+    __mockStorage.credential.getAll.mockResolvedValue([{ id: '2', username: 'other', password: 'p2', created_at: 'd2', modified_at: undefined }])
     await expect(updateCredential(context, 'notfound', 'new', 'newpass')).rejects.toThrow('Credential with ID "notfound" not found')
     expect(mockUpdate).not.toHaveBeenCalled()
     expect(mockStore).not.toHaveBeenCalled()
   })
 
   it('throws if username already exists for another credential', async () => {
-    __mockGetAllCredentials.mockResolvedValue([
+    __mockStorage.credential.getAll.mockResolvedValue([
       { id: '1', username: 'old', password: 'p', created_at: 'd', modified_at: undefined },
       { id: '2', username: 'new', password: 'p2', created_at: 'd2', modified_at: undefined }
     ])

@@ -1,7 +1,7 @@
 import '#mocks/vscode'
 import '#mocks/storage'
 import { mockShowQuickPick, mockShowInputBox, mockShowWarningMessage } from '#mocks/vscode'
-import { __mockGetAllCredentials, __mockCreateCredential } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { Prompts } from '@/prompts'
 import { credentialPrompt, credentialDetailsPrompt, editCredentialDetailsPrompt } from '@/prompts/credentials/credential'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
@@ -16,13 +16,13 @@ describe('credentialPrompt', () => {
   })
   afterEach(() => {
     mockShowQuickPick.mockReset()
-    __mockGetAllCredentials.mockReset()
-    __mockCreateCredential.mockReset()
+    __mockStorage.credential.getAll.mockReset()
+    __mockStorage.credential.create.mockReset()
     detailsSpy.mockReset()
   })
 
   it('returns selected credential username', async () => {
-    __mockGetAllCredentials.mockResolvedValue([
+    __mockStorage.credential.getAll.mockResolvedValue([
       { username: 'user1' },
       { username: 'user2' }
     ])
@@ -32,25 +32,25 @@ describe('credentialPrompt', () => {
   })
 
   it('returns undefined if quick pick is cancelled', async () => {
-    __mockGetAllCredentials.mockResolvedValue([{ username: 'user1' }])
+    __mockStorage.credential.getAll.mockResolvedValue([{ username: 'user1' }])
     mockShowQuickPick.mockResolvedValue(undefined)
     const result = await credentialPrompt(context)
     expect(result).toBeUndefined()
   })
 
   it('creates new credential if selected', async () => {
-    __mockGetAllCredentials.mockResolvedValue([{ username: 'user1' }])
+    __mockStorage.credential.getAll.mockResolvedValue([{ username: 'user1' }])
     mockShowQuickPick.mockResolvedValue({ label: '$(add) Create new credential', isCreateNew: true })
     detailsSpy.mockResolvedValue({ username: 'newuser', password: 'pass' })
-    __mockCreateCredential.mockResolvedValue(undefined)
+    __mockStorage.credential.create.mockResolvedValue(undefined)
     const result = await credentialPrompt(context)
     expect(detailsSpy).toHaveBeenCalled()
-    expect(__mockCreateCredential).toHaveBeenCalledWith(context, 'newuser', 'pass')
+    expect(__mockStorage.credential.create).toHaveBeenCalledWith(context, 'newuser', 'pass')
     expect(result).toBe('newuser')
   })
 
   it('returns undefined if new credential prompt is cancelled', async () => {
-    __mockGetAllCredentials.mockResolvedValue([{ username: 'user1' }])
+    __mockStorage.credential.getAll.mockResolvedValue([{ username: 'user1' }])
     mockShowQuickPick.mockResolvedValue({ label: '$(add) Create new credential', isCreateNew: true })
     detailsSpy.mockResolvedValue(undefined)
     const result = await credentialPrompt(context)
@@ -94,12 +94,12 @@ describe('editCredentialDetailsPrompt', () => {
   afterEach(() => {
     mockShowQuickPick.mockReset()
     mockShowInputBox.mockReset()
-    __mockGetAllCredentials.mockReset()
+    __mockStorage.credential.getAll.mockReset()
     mockShowWarningMessage.mockReset()
   })
 
   it('returns undefined if item.contextValue is emptyCredentials', async () => {
-    __mockGetAllCredentials.mockResolvedValue([{ id: '1', username: 'user', password: 'pass' }])
+    __mockStorage.credential.getAll.mockResolvedValue([{ id: '1', username: 'user', password: 'pass' }])
     const result = await editCredentialDetailsPrompt(context, { contextValue: 'emptyCredentials' } as any)
     expect(result).toBeUndefined()
   })
@@ -109,13 +109,13 @@ describe('editCredentialDetailsPrompt', () => {
       { id: '1', username: 'user', password: 'pass' },
       { id: '2', username: 'other', password: 'p2' }
     ]
-    __mockGetAllCredentials.mockResolvedValue(creds)
+    __mockStorage.credential.getAll.mockResolvedValue(creds)
     const result = await editCredentialDetailsPrompt(context, { id: '2' } as any)
     expect(result).toEqual(creds[1])
   })
 
   it('shows warning and returns undefined if no credentials', async () => {
-    __mockGetAllCredentials.mockResolvedValue([])
+    __mockStorage.credential.getAll.mockResolvedValue([])
     mockShowWarningMessage.mockResolvedValue(undefined)
     const result = await editCredentialDetailsPrompt(context)
     expect(mockShowWarningMessage).toHaveBeenCalledWith('No credentials available.')
@@ -127,7 +127,7 @@ describe('editCredentialDetailsPrompt', () => {
       { id: '1', username: 'user', password: 'pass' },
       { id: '2', username: 'other', password: 'p2' }
     ]
-    __mockGetAllCredentials.mockResolvedValue(creds)
+    __mockStorage.credential.getAll.mockResolvedValue(creds)
     mockShowQuickPick.mockResolvedValue({ label: 'other' })
     const result = await editCredentialDetailsPrompt(context)
     expect(result).toEqual(creds[1])
@@ -137,7 +137,7 @@ describe('editCredentialDetailsPrompt', () => {
     const creds = [
       { id: '1', username: 'user', password: 'pass' }
     ]
-    __mockGetAllCredentials.mockResolvedValue(creds)
+    __mockStorage.credential.getAll.mockResolvedValue(creds)
     mockShowQuickPick.mockResolvedValue(undefined)
     const result = await editCredentialDetailsPrompt(context)
     expect(result).toBeUndefined()

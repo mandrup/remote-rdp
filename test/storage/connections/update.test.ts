@@ -2,7 +2,7 @@ import '#mocks/vscode'
 import '#mocks/storage'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { PREFIXES } from '@/constants'
-import { __mockGetAllConnections } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 
 import { updateConnections } from '@/storage/connections/update'
 
@@ -47,7 +47,6 @@ describe('updateConnectionsCredential', () => {
       return Promise.resolve()
     })
     context.globalState.get.mockImplementation(() => stored)
-    // Spy before importing
     const updateModule = await import('@/storage/connections/update')
     vi.spyOn(updateModule, 'updateConnections').mockImplementation((ctx, updated) => context.globalState.update(PREFIXES.connection, updated))
     updateConnectionsCredential = updateModule.updateConnectionsCredential
@@ -58,7 +57,7 @@ describe('updateConnectionsCredential', () => {
       { id: '1', hostname: 'h', credentialUsername: 'old', created_at: 'd' },
       { id: '2', hostname: 'h2', credentialUsername: 'other', created_at: 'd' }
     ]
-    __mockGetAllConnections.mockReturnValue(conns)
+    __mockStorage.connection.getAll.mockReturnValue(conns)
     await updateConnectionsCredential(context, 'old', 'new')
     expect(context.globalState.update).toHaveBeenCalledWith(PREFIXES.connection, [
       { id: '1', hostname: 'h', credentialUsername: 'new', created_at: 'd' },
@@ -90,7 +89,7 @@ describe('clearConnectionsCredential', () => {
       { id: '2', hostname: 'h2', credentialUsername: 'other', created_at: 'd' },
       { id: '3', hostname: 'h3', credentialUsername: 'user', created_at: 'd' }
     ]
-    __mockGetAllConnections.mockReturnValue(conns)
+    __mockStorage.connection.getAll.mockReturnValue(conns)
     const result = await clearConnectionsCredential(context, 'user')
     expect(context.globalState.update).toHaveBeenCalledWith(PREFIXES.connection, [
       { id: '1', hostname: 'h', credentialUsername: undefined, created_at: 'd' },

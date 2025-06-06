@@ -3,7 +3,7 @@ import '#mocks/storage'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ConnectionsDragDropController } from '@/providers/connections/drag-drop'
 import { MIME_TYPES } from '@/constants'
-import { __mockGetAllConnections, __mockUpdateAllConnections } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import * as vscode from 'vscode'
 
 describe('ConnectionsDragDropController', () => {
@@ -16,8 +16,8 @@ describe('ConnectionsDragDropController', () => {
         refresh = vi.fn()
         controller = new ConnectionsDragDropController(context, refresh)
         mockShowErrorMessage = vi.spyOn(vscode.window, 'showErrorMessage').mockResolvedValue(undefined)
-        __mockGetAll = __mockGetAllConnections
-        __mockUpdateAll = __mockUpdateAllConnections
+        __mockGetAll = __mockStorage.connection.getAll
+        __mockUpdateAll = __mockStorage.connection.updateAll
     })
 
     afterEach(() => {

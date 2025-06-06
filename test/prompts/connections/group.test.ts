@@ -1,7 +1,7 @@
 import '#mocks/vscode'
 import '#mocks/storage'
 import { mockShowQuickPick, mockShowInputBox } from '#mocks/vscode'
-import { __mockGetAllConnections } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { createMockContext } from '#mocks/extension-context'
 import { promptForGroup } from '@/prompts/connections/group'
 import { ExtensionContext } from 'vscode'
@@ -26,7 +26,7 @@ describe('promptForGroup', () => {
     })
 
     it('calls promptNewGroupInput if no groups exist', async () => {
-        __mockGetAllConnections.mockReturnValue([{ group: undefined }, { group: undefined }])
+        __mockStorage.connection.getAll.mockReturnValue([{ group: undefined }, { group: undefined }])
         mockShowInputBox.mockResolvedValue('newgroup')
 
         const result = await promptForGroup(context)
@@ -36,7 +36,7 @@ describe('promptForGroup', () => {
     })
 
     it('returns cancelled if promptNewGroupInput is cancelled', async () => {
-        __mockGetAllConnections.mockReturnValue([])
+        __mockStorage.connection.getAll.mockReturnValue([])
         mockShowInputBox.mockResolvedValue(undefined)
 
         const result = await promptForGroup(context)
@@ -45,7 +45,7 @@ describe('promptForGroup', () => {
     })
 
     it('shows quick pick with group items and returns selected group', async () => {
-        __mockGetAllConnections.mockReturnValue([
+        __mockStorage.connection.getAll.mockReturnValue([
             { group: 'A' },
             { group: 'B' },
             { group: 'A' },
@@ -60,7 +60,7 @@ describe('promptForGroup', () => {
     })
 
     it('returns undefined for "No group" selection', async () => {
-        __mockGetAllConnections.mockReturnValue([{ group: 'A' }])
+        __mockStorage.connection.getAll.mockReturnValue([{ group: 'A' }])
         mockShowQuickPick.mockResolvedValue({ label: 'No group' })
 
         const result = await promptForGroup(context)
@@ -69,7 +69,7 @@ describe('promptForGroup', () => {
     })
 
     it('handles "Create new group" selection and returns new group', async () => {
-        __mockGetAllConnections.mockReturnValue([{ group: 'A' }])
+        __mockStorage.connection.getAll.mockReturnValue([{ group: 'A' }])
         mockShowQuickPick.mockResolvedValue({ label: 'Create new group' })
         mockShowInputBox.mockResolvedValue('newgroup')
 
@@ -83,7 +83,7 @@ describe('promptForGroup', () => {
     })
 
     it('handles "Create new group" selection and cancel', async () => {
-        __mockGetAllConnections.mockReturnValue([{ group: 'A' }])
+        __mockStorage.connection.getAll.mockReturnValue([{ group: 'A' }])
         mockShowQuickPick.mockResolvedValue({ label: 'Create new group' })
         mockShowInputBox.mockResolvedValue(undefined)
 
@@ -93,7 +93,7 @@ describe('promptForGroup', () => {
     })
 
     it('returns cancelled if quick pick is cancelled', async () => {
-        __mockGetAllConnections.mockReturnValue([{ group: 'A' }])
+        __mockStorage.connection.getAll.mockReturnValue([{ group: 'A' }])
         mockShowQuickPick.mockResolvedValue(undefined)
 
         const result = await promptForGroup(context)

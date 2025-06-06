@@ -2,7 +2,7 @@ import '#mocks/vscode'
 import '#mocks/storage'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { CredentialsProvider } from '@/providers/credentials/provider'
-import { __mockGetAllCredentials } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import * as vscode from 'vscode'
 
 describe('CredentialsProvider', () => {
@@ -36,7 +36,7 @@ describe('CredentialsProvider', () => {
     })
 
     it('returns empty item if no credentials', async () => {
-        __mockGetAllCredentials.mockResolvedValue([])
+        __mockStorage.credential.getAll.mockResolvedValue([])
         const children = await provider.getChildren()
         expect(children).toHaveLength(1)
         expect(children[0].type).toBe('empty')
@@ -48,7 +48,7 @@ describe('CredentialsProvider', () => {
             { id: '2', username: 'b', password: 'p', created_at: 'd' },
             { id: '1', username: 'a', password: 'p', created_at: 'd' },
         ]
-        __mockGetAllCredentials.mockResolvedValue(credentials)
+        __mockStorage.credential.getAll.mockResolvedValue(credentials)
         const children = await provider.getChildren()
         expect(children).toHaveLength(2)
         expect(children[0].label).toBe('a')
@@ -58,13 +58,13 @@ describe('CredentialsProvider', () => {
     })
 
     it('returns [] for non-root element', async () => {
-        __mockGetAllCredentials.mockResolvedValue([{ id: '1', username: 'a', password: 'p', created_at: 'd' }])
+        __mockStorage.credential.getAll.mockResolvedValue([{ id: '1', username: 'a', password: 'p', created_at: 'd' }])
         const result = await provider.getChildren({ type: 'credential' } as any)
         expect(result).toEqual([])
     })
 
     it('handles errors and shows error message', async () => {
-        __mockGetAllCredentials.mockImplementation(() => { throw new Error('fail') })
+        __mockStorage.credential.getAll.mockImplementation(() => { throw new Error('fail') })
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
         const result = await provider.getChildren()
         expect(result).toEqual([])

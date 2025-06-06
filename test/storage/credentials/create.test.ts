@@ -1,6 +1,6 @@
 import '#mocks/vscode'
 import '#mocks/storage'
-import { __mockGetAllCredentials, __mockCreateCredential } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { createCredential } from '@/storage/credentials/create'
 import { PREFIXES } from '@/constants'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
@@ -35,9 +35,9 @@ describe('createCredential', () => {
   it('creates and saves a new credential', async () => {
     const now = '2025-06-03T12:00:00.000Z'
     vi.spyOn(global, 'Date').mockImplementation(() => ({ toISOString: () => now }) as any)
-    __mockGetAllCredentials.mockResolvedValue([])
+    __mockStorage.credential.getAll.mockResolvedValue([])
     await createCredential(context, 'user', 'pass')
-    expect(__mockGetAllCredentials).toHaveBeenCalledWith(context)
+    expect(__mockStorage.credential.getAll).toHaveBeenCalledWith(context)
     expect(mockUpdate).toHaveBeenCalledWith(PREFIXES.credential, [
       { id: '123e4567-e89b-12d3-a456-426614174000', username: 'user', created_at: now }
     ])
@@ -45,7 +45,7 @@ describe('createCredential', () => {
   })
 
   it('throws if credential for username already exists', async () => {
-    __mockGetAllCredentials.mockResolvedValue([{ username: 'user' }])
+    __mockStorage.credential.getAll.mockResolvedValue([{ username: 'user' }])
     await expect(createCredential(context, 'user', 'pass')).rejects.toThrow('Credential for username "user" already exists')
     expect(mockUpdate).not.toHaveBeenCalled()
     expect(mockStore).not.toHaveBeenCalled()

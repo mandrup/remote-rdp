@@ -1,6 +1,6 @@
 import '#mocks/vscode'
 import '#mocks/storage'
-import { __mockGetAllConnections } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { createConnection } from '@/storage/connections/create'
 import { PREFIXES } from '@/constants'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
@@ -37,7 +37,7 @@ describe('createConnection', () => {
   })
 
   it('creates and saves a new connection', async () => {
-    __mockGetAllConnections.mockReturnValue([])
+    __mockStorage.connection.getAll.mockReturnValue([])
     __mockIsConnectionModel.mockReturnValue(true)
     await createConnection(context, 'host', 'user', 'group')
     expect(__mockIsConnectionModel).toHaveBeenCalledWith({
@@ -59,14 +59,14 @@ describe('createConnection', () => {
   })
 
   it('throws if connection is invalid', async () => {
-    __mockGetAllConnections.mockReturnValue([])
+    __mockStorage.connection.getAll.mockReturnValue([])
     __mockIsConnectionModel.mockReturnValue(false)
     await expect(createConnection(context, 'host', 'user', 'group')).rejects.toThrow('Invalid connection data')
     expect(context.globalState.update).not.toHaveBeenCalled()
   })
 
   it('throws if duplicate connection exists', async () => {
-    __mockGetAllConnections.mockReturnValue([
+    __mockStorage.connection.getAll.mockReturnValue([
       { hostname: 'host', credentialUsername: 'user' }
     ])
     __mockIsConnectionModel.mockReturnValue(true)

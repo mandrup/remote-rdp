@@ -6,7 +6,7 @@ import * as vscode from 'vscode'
 import updateCredentialCommand from '@/commands/credentials/update'
 import { COMMAND_IDS } from '@/constants'
 import { __mockPrompts } from '#mocks/prompts'
-import { __mockUpdate, __mockUpdateAllCredential } from '#mocks/storage'
+import { __mockStorage  } from '#mocks/storage'
 
 let mockHandleCommandError: ReturnType<typeof vi.fn>
 
@@ -27,15 +27,15 @@ describe('updateCredentialCommand', () => {
     const details = { username: 'newuser', password: 'pass' }
     __mockPrompts.credential.editDetails.mockResolvedValue(credential)
     __mockPrompts.credential.details.mockResolvedValue(details) // <-- changed
-    __mockUpdate.mockResolvedValue(undefined)
-    __mockUpdateAllCredential.mockResolvedValue(undefined)
+    __mockStorage.credential.update.mockResolvedValue(undefined)
+    __mockStorage.connection.updateAllCredential.mockResolvedValue(undefined)
 
     await updateCredentialCommand(context)
 
     expect(__mockPrompts.credential.editDetails).toHaveBeenCalledWith(context, undefined)
     expect(__mockPrompts.credential.details).toHaveBeenCalledWith('olduser') // <-- changed
-    expect(__mockUpdate).toHaveBeenCalledWith(context, 'id1', 'newuser', 'pass')
-    expect(__mockUpdateAllCredential).toHaveBeenCalledWith(context, 'olduser', 'newuser')
+    expect(__mockStorage.credential.update).toHaveBeenCalledWith(context, 'id1', 'newuser', 'pass')
+    expect(__mockStorage.connection.updateAllCredential).toHaveBeenCalledWith(context, 'olduser', 'newuser')
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.credential.refresh)
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.connection.refresh)
   })
@@ -44,8 +44,8 @@ describe('updateCredentialCommand', () => {
     __mockPrompts.credential.editDetails.mockResolvedValue(undefined)
     await updateCredentialCommand(context)
     expect(__mockPrompts.credential.select).not.toHaveBeenCalled()
-    expect(__mockUpdate).not.toHaveBeenCalled()
-    expect(__mockUpdateAllCredential).not.toHaveBeenCalled()
+    expect(__mockStorage.credential.update).not.toHaveBeenCalled()
+    expect(__mockStorage.connection.updateAllCredential).not.toHaveBeenCalled()
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled()
   })
 
@@ -53,8 +53,8 @@ describe('updateCredentialCommand', () => {
     __mockPrompts.credential.editDetails.mockResolvedValue({ id: 'id1', username: 'olduser' })
     __mockPrompts.credential.details.mockResolvedValue(undefined) // <-- use details, not select
     await updateCredentialCommand(context)
-    expect(__mockUpdate).not.toHaveBeenCalled()
-    expect(__mockUpdateAllCredential).not.toHaveBeenCalled()
+    expect(__mockStorage.credential.update).not.toHaveBeenCalled()
+    expect(__mockStorage.connection.updateAllCredential).not.toHaveBeenCalled()
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled()
   })
 

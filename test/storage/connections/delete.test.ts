@@ -1,6 +1,6 @@
 import '#mocks/vscode'
 import '#mocks/storage'
-import { __mockGetAllConnections, __mockUpdateAllConnections } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { deleteConnection } from '@/storage/connections/delete'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
@@ -19,10 +19,10 @@ describe('deleteConnection', () => {
       { id: '1', hostname: 'h1' },
       { id: '2', hostname: 'h2' }
     ]
-    __mockGetAllConnections.mockReturnValue(connections)
-    __mockUpdateAllConnections.mockResolvedValue(undefined)
+    __mockStorage.connection.getAll.mockReturnValue(connections)
+    __mockStorage.connection.updateAll.mockResolvedValue(undefined)
     await deleteConnection(context, '1')
-    expect(__mockUpdateAllConnections).toHaveBeenCalledWith(context, [
+    expect(__mockStorage.connection.updateAll).toHaveBeenCalledWith(context, [
       { id: '2', hostname: 'h2' }
     ])
   })
@@ -31,10 +31,10 @@ describe('deleteConnection', () => {
     const connections = [
       { id: '1', hostname: 'h1' }
     ]
-    __mockGetAllConnections.mockReturnValue(connections)
-    __mockUpdateAllConnections.mockResolvedValue(undefined)
+    __mockStorage.connection.getAll.mockReturnValue(connections)
+    __mockStorage.connection.updateAll.mockResolvedValue(undefined)
     await deleteConnection(context, 'notfound')
-    expect(__mockUpdateAllConnections).toHaveBeenCalledWith(context, [
+    expect(__mockStorage.connection.updateAll).toHaveBeenCalledWith(context, [
       { id: '1', hostname: 'h1' }
     ])
   })

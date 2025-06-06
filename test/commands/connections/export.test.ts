@@ -4,8 +4,8 @@ import '#mocks/prompts'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import exportConnectionsCommand from '@/commands/connections/export'
 import * as vscode from 'vscode'
-import { __mockGetAllConnections } from '#mocks/storage'
-import { __mockExportFilePrompt } from '#mocks/prompts'
+import { __mockStorage } from '#mocks/storage'
+import { __mockPrompts } from '#mocks/prompts'
 
 const mockWriteFile = vscode.workspace.fs.writeFile as any
 
@@ -24,14 +24,14 @@ describe('exportConnectionsCommand', () => {
     const mockUri = { path: '/file.json' }
 
     beforeEach(() => {
-      __mockGetAllConnections.mockReturnValue(mockConnections)
-      __mockExportFilePrompt.mockResolvedValue(mockUri)
+      __mockStorage.connection.getAll.mockReturnValue(mockConnections)
+      __mockPrompts.connection.exportFile.mockResolvedValue(mockUri)
       mockWriteFile.mockResolvedValue(undefined)
     })
 
     it('exports connections to file', async () => {
       await exportConnectionsCommand(context)
-      expect(__mockExportFilePrompt).toHaveBeenCalledWith(
+      expect(__mockPrompts.connection.exportFile).toHaveBeenCalledWith(
         vscode.Uri.file('connections.json'),
         { 'JSON files': ['json'] }
       )
@@ -44,8 +44,8 @@ describe('exportConnectionsCommand', () => {
 
   describe('when no connections exist', () => {
     beforeEach(() => {
-      __mockGetAllConnections.mockReturnValue([])
-      __mockExportFilePrompt.mockImplementation(() => {
+      __mockStorage.connection.getAll.mockReturnValue([])
+      __mockPrompts.connection.exportFile.mockImplementation(() => {
         vscode.window.showWarningMessage('No connections available.')
         return undefined
       })
@@ -54,7 +54,7 @@ describe('exportConnectionsCommand', () => {
     it('shows warning message', async () => {
       await exportConnectionsCommand(context)
       expect(vscode.window.showWarningMessage).toHaveBeenCalledWith('No connections available.')
-      expect(__mockExportFilePrompt).not.toHaveBeenCalled()
+      expect(__mockPrompts.connection.exportFile).not.toHaveBeenCalled()
       expect(mockWriteFile).not.toHaveBeenCalled()
     })
   })
@@ -63,8 +63,8 @@ describe('exportConnectionsCommand', () => {
     const mockConnections = [{ id: '1', hostname: 'h1' }]
 
     beforeEach(() => {
-      __mockGetAllConnections.mockReturnValue(mockConnections)
-      __mockExportFilePrompt.mockResolvedValue(undefined)
+      __mockStorage.connection.getAll.mockReturnValue(mockConnections)
+      __mockPrompts.connection.exportFile.mockResolvedValue(undefined)
     })
 
     it('does nothing', async () => {
@@ -77,8 +77,8 @@ describe('exportConnectionsCommand', () => {
     const mockConnections = [{ id: '1', hostname: 'h1' }]
 
     beforeEach(() => {
-      __mockGetAllConnections.mockReturnValue(mockConnections)
-      __mockExportFilePrompt.mockResolvedValue({ path: '/file.json' })
+      __mockStorage.connection.getAll.mockReturnValue(mockConnections)
+      __mockPrompts.connection.exportFile.mockResolvedValue({ path: '/file.json' })
     })
 
     it('handles write errors', async () => {

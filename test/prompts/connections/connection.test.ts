@@ -1,7 +1,7 @@
 import '#mocks/vscode'
 import '#mocks/storage'
 import { mockShowQuickPick, mockShowInputBox } from '#mocks/vscode'
-import { __mockGetAllConnections } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { createMockContext } from '#mocks/extension-context'
 import { promptForConnection } from '@/prompts/connections/connection'
 import { ExtensionContext } from 'vscode'
@@ -29,7 +29,7 @@ describe('promptForConnection', () => {
       { id: '1', hostname: 'h1', created_at: '2024-01-01' },
       { id: '2', hostname: 'h2', created_at: '2024-01-02' }
     ]
-    __mockGetAllConnections.mockReturnValue(connections)
+    __mockStorage.connection.getAll.mockReturnValue(connections)
     const item = { id: '2' }
     const result = await promptForConnection(context, item as any)
     expect(result).toEqual(connections[1])
@@ -41,7 +41,7 @@ describe('promptForConnection', () => {
       { id: '1', hostname: 'h1', group: 'g', credentialUsername: 'u', created_at: '2024-01-01' },
       { id: '2', hostname: 'h2', created_at: '2024-01-02' }
     ]
-    __mockGetAllConnections.mockReturnValue(connections)
+    __mockStorage.connection.getAll.mockReturnValue(connections)
     mockShowQuickPick.mockResolvedValue({ id: '1' })
     const result = await promptForConnection(context)
     expect(mockShowQuickPick).toHaveBeenCalledWith([
@@ -65,7 +65,7 @@ describe('promptForConnection', () => {
     const connections = [
       { id: '1', hostname: 'h1', created_at: '2024-01-01' }
     ]
-    __mockGetAllConnections.mockReturnValue(connections)
+    __mockStorage.connection.getAll.mockReturnValue(connections)
     mockShowQuickPick.mockResolvedValue(undefined)
     const result = await promptForConnection(context)
     expect(result).toBeUndefined()

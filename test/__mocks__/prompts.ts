@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 
-const promptMocks = {
+export const __mockPrompts = {
   connection: {
     select: vi.fn(),
     hostname: vi.fn(),
@@ -16,13 +16,5 @@ const promptMocks = {
 }
 
 vi.mock('@/prompts', () => ({
-  Prompts: promptMocks,
+  Prompts: __mockPrompts,
 }))
-
-export const __mockPrompts = promptMocks
-export const __mockConnectionPrompt = promptMocks.connection.select
-export const __mockHostnamePrompt = promptMocks.connection.hostname
-export const __mockGroupPrompt = promptMocks.connection.group
-export const __mockCredentialPrompt = promptMocks.credential.select
-export const __mockExportFilePrompt = promptMocks.connection.exportFile
-export const __mockImportFilePrompt = promptMocks.connection.importFile

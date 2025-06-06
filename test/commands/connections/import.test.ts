@@ -9,8 +9,8 @@ import '#mocks/prompts'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import importConnectionsCommand from '@/commands/connections/import'
 import * as vscode from 'vscode'
-import { __mockImportFilePrompt } from '#mocks/prompts'
-import { __mockGetAllConnections, __mockUpdateAllConnections } from '#mocks/storage'
+import { __mockPrompts } from '#mocks/prompts'
+import { __mockStorage } from '#mocks/storage'
 
 const mockReadFile = vscode.workspace.fs.readFile as any
 
@@ -41,18 +41,18 @@ describe('importConnectionsCommand', () => {
     ]
 
     beforeEach(() => {
-      __mockImportFilePrompt.mockResolvedValue(mockUri)
+      __mockPrompts.connection.importFile.mockResolvedValue(mockUri)
       mockReadFile.mockResolvedValue(Buffer.from(JSON.stringify(mockImportedConnections)))
       mockIsConnectionModelArray.mockReturnValue(true)
-      __mockGetAllConnections.mockReturnValue(mockExistingConnections)
-      __mockUpdateAllConnections.mockResolvedValue(undefined)
+      __mockStorage.connection.getAll.mockReturnValue(mockExistingConnections)
+      __mockStorage.connection.updateAll.mockResolvedValue(undefined)
     })
 
     it('imports and merges connections from file', async () => {
       await importConnectionsCommand(context)
-      expect(__mockImportFilePrompt).toHaveBeenCalled()
+      expect(__mockPrompts.connection.importFile).toHaveBeenCalled()
       expect(mockReadFile).toHaveBeenCalledWith(mockUri)
-      expect(__mockUpdateAllConnections).toHaveBeenCalledWith(context, [
+      expect(__mockStorage.connection.updateAll).toHaveBeenCalledWith(context, [
         { id: '1', hostname: 'h1', group: 'g1' },
         { id: '3', hostname: 'h3', group: 'g3' },
         { id: '2', hostname: 'h2', group: 'g2' }
@@ -63,13 +63,13 @@ describe('importConnectionsCommand', () => {
 
   describe('when file prompt is cancelled', () => {
     beforeEach(() => {
-      __mockImportFilePrompt.mockResolvedValue(undefined)
+      __mockPrompts.connection.importFile.mockResolvedValue(undefined)
     })
 
     it('does nothing', async () => {
       await importConnectionsCommand(context)
       expect(mockReadFile).not.toHaveBeenCalled()
-      expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+      expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
     })
   })
 
@@ -77,14 +77,14 @@ describe('importConnectionsCommand', () => {
     const mockUri = { path: '/file.json' }
 
     beforeEach(() => {
-      __mockImportFilePrompt.mockResolvedValue(mockUri)
+      __mockPrompts.connection.importFile.mockResolvedValue(mockUri)
     })
 
     it('shows error if file is invalid JSON', async () => {
       mockReadFile.mockResolvedValue(Buffer.from('not json'))
       await importConnectionsCommand(context)
       expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('Invalid JSON file.')
-      expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+      expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
     })
 
     it('shows error if file is not a valid connection array', async () => {
@@ -92,14 +92,14 @@ describe('importConnectionsCommand', () => {
       mockIsConnectionModelArray.mockReturnValue(false)
       await importConnectionsCommand(context)
       expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('Invalid JSON file.')
-      expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+      expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
     })
   })
 
   describe('error handling', () => {
     it('handles errors with handleCommandError', async () => {
       const error = new Error('fail')
-      __mockImportFilePrompt.mockRejectedValue(error)
+      __mockPrompts.connection.importFile.mockRejectedValue(error)
       mockHandleCommandError.mockClear()
       await expect(importConnectionsCommand(context)).resolves.toBeUndefined()
       expect(mockHandleCommandError).toHaveBeenCalledWith('import connection', error)

@@ -6,7 +6,7 @@ import * as vscode from 'vscode'
 import deleteCredentialCommand from '@/commands/credentials/delete'
 import { COMMAND_IDS } from '@/constants'
 import { __mockPrompts } from '#mocks/prompts'
-import { __mockGetAllConnections } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 import { Storage } from '@/storage'
 
 let mockHandleCommandError: ReturnType<typeof vi.fn>
@@ -36,7 +36,7 @@ describe('deleteCredentialCommand', () => {
       { id: '2', credentialUsername: 'other' }
     ]
     __mockPrompts.credential.editDetails.mockResolvedValue(credential)
-    __mockGetAllConnections.mockReturnValue(connections)
+    __mockStorage.connection.getAll.mockReturnValue(connections)
     __mockDeleteCredential.mockResolvedValue(undefined)
     __mockClearAllCredential.mockResolvedValue(undefined)
 
@@ -55,7 +55,7 @@ describe('deleteCredentialCommand', () => {
       { id: '1', credentialUsername: 'other' }
     ]
     __mockPrompts.credential.editDetails.mockResolvedValue(credential)
-    __mockGetAllConnections.mockReturnValue(connections)
+    __mockStorage.connection.getAll.mockReturnValue(connections)
     __mockDeleteCredential.mockResolvedValue(undefined)
 
     await deleteCredentialCommand(context)

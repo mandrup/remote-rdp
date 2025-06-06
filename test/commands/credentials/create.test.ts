@@ -6,7 +6,7 @@ import * as vscode from 'vscode'
 import createCredentialCommand from '@/commands/credentials/create'
 import { COMMAND_IDS } from '@/constants'
 import { __mockPrompts } from '#mocks/prompts'
-import { __mockCreateCredential } from '#mocks/storage'
+import { __mockStorage } from '#mocks/storage'
 
 let mockHandleCommandError: ReturnType<typeof vi.fn>
 vi.mock('@/commands/index', () => ({
@@ -23,19 +23,19 @@ describe('createCredentialCommand', () => {
 
   it('creates a credential when details prompt succeeds', async () => {
     __mockPrompts.credential.details.mockResolvedValue({ username: 'user', password: 'pass' })
-    __mockCreateCredential.mockResolvedValue(undefined)
+    __mockStorage.credential.create.mockResolvedValue(undefined)
 
     await createCredentialCommand(context)
 
     expect(__mockPrompts.credential.details).toHaveBeenCalled()
-    expect(__mockCreateCredential).toHaveBeenCalledWith(context, 'user', 'pass')
+    expect(__mockStorage.credential.create).toHaveBeenCalledWith(context, 'user', 'pass')
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.credential.refresh)
   })
 
   it('does nothing if details prompt is cancelled', async () => {
     __mockPrompts.credential.details.mockResolvedValue(undefined)
     await createCredentialCommand(context)
-    expect(__mockCreateCredential).not.toHaveBeenCalled()
+    expect(__mockStorage.credential.create).not.toHaveBeenCalled()
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled()
   })
 

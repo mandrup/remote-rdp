@@ -10,8 +10,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import * as vscode from 'vscode'
 import { COMMAND_IDS } from '@/constants'
 import { updateConnectionCommand, updateGroupCredentialsCommand } from '@/commands/connections/update'
-import { __mockConnectionPrompt, __mockHostnamePrompt, __mockGroupPrompt, __mockCredentialPrompt } from '#mocks/prompts'
-import { __mockGetAllConnections, __mockUpdateAllConnections } from '#mocks/storage'
+import { __mockPrompts } from '#mocks/prompts'
+import { __mockStorage } from '#mocks/storage'
 
 describe('updateConnectionCommand', () => {
   const context = {} as any
@@ -24,20 +24,20 @@ describe('updateConnectionCommand', () => {
   it('updates a connection when all prompts succeed', async () => {
     const fakeConnection = { id: '1', hostname: 'old', group: 'g', credentialUsername: 'u' }
     const fakeConnections = [fakeConnection, { id: '2' }]
-    __mockConnectionPrompt.mockResolvedValue(fakeConnection)
-    __mockHostnamePrompt.mockResolvedValue('newhost')
-    __mockGroupPrompt.mockResolvedValue({ cancelled: false, value: 'newgroup' })
-    __mockCredentialPrompt.mockResolvedValue('newuser')
-    __mockGetAllConnections.mockReturnValue(fakeConnections)
-    __mockUpdateAllConnections.mockResolvedValue(undefined)
+    __mockPrompts.connection.select.mockResolvedValue(fakeConnection)
+    __mockPrompts.connection.hostname.mockResolvedValue('newhost')
+    __mockPrompts.connection.group.mockResolvedValue({ cancelled: false, value: 'newgroup' })
+    __mockPrompts.credential.select.mockResolvedValue('newuser')
+    __mockStorage.connection.getAll.mockReturnValue(fakeConnections)
+    __mockStorage.connection.updateAll.mockResolvedValue(undefined)
 
     await updateConnectionCommand(context)
 
-    expect(__mockConnectionPrompt).toHaveBeenCalledWith(context, undefined)
-    expect(__mockHostnamePrompt).toHaveBeenCalledWith('old')
-    expect(__mockGroupPrompt).toHaveBeenCalledWith(context, 'g')
-    expect(__mockCredentialPrompt).toHaveBeenCalledWith(context, 'u')
-    expect(__mockUpdateAllConnections).toHaveBeenCalledWith(context, [
+    expect(__mockPrompts.connection.select).toHaveBeenCalledWith(context, undefined)
+    expect(__mockPrompts.connection.hostname).toHaveBeenCalledWith('old')
+    expect(__mockPrompts.connection.group).toHaveBeenCalledWith(context, 'g')
+    expect(__mockPrompts.credential.select).toHaveBeenCalledWith(context, 'u')
+    expect(__mockStorage.connection.updateAll).toHaveBeenCalledWith(context, [
       { ...fakeConnection, hostname: 'newhost', credentialUsername: 'newuser', group: 'newgroup' },
       { id: '2' }
     ])
@@ -46,41 +46,41 @@ describe('updateConnectionCommand', () => {
   })
 
   it('does nothing if connection prompt is cancelled', async () => {
-    __mockConnectionPrompt.mockResolvedValue(undefined)
+    __mockPrompts.connection.select.mockResolvedValue(undefined)
     await updateConnectionCommand(context)
-    expect(__mockHostnamePrompt).not.toHaveBeenCalled()
-    expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+    expect(__mockPrompts.connection.hostname).not.toHaveBeenCalled()
+    expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
   })
 
   it('does nothing if hostname prompt is cancelled', async () => {
-    __mockConnectionPrompt.mockResolvedValue({ id: '1', hostname: 'old', group: 'g', credentialUsername: 'u' })
-    __mockHostnamePrompt.mockResolvedValue(undefined)
+    __mockPrompts.connection.select.mockResolvedValue({ id: '1', hostname: 'old', group: 'g', credentialUsername: 'u' })
+    __mockPrompts.connection.hostname.mockResolvedValue(undefined)
     await updateConnectionCommand(context)
-    expect(__mockGroupPrompt).not.toHaveBeenCalled()
-    expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+    expect(__mockPrompts.connection.group).not.toHaveBeenCalled()
+    expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
   })
 
   it('does nothing if group prompt is cancelled', async () => {
-    __mockConnectionPrompt.mockResolvedValue({ id: '1', hostname: 'old', group: 'g', credentialUsername: 'u' })
-    __mockHostnamePrompt.mockResolvedValue('newhost')
-    __mockGroupPrompt.mockResolvedValue({ cancelled: true })
+    __mockPrompts.connection.select.mockResolvedValue({ id: '1', hostname: 'old', group: 'g', credentialUsername: 'u' })
+    __mockPrompts.connection.hostname.mockResolvedValue('newhost')
+    __mockPrompts.connection.group.mockResolvedValue({ cancelled: true })
     await updateConnectionCommand(context)
-    expect(__mockCredentialPrompt).not.toHaveBeenCalled()
-    expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+    expect(__mockPrompts.credential.select).not.toHaveBeenCalled()
+    expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
   })
 
   it('does nothing if credential prompt is cancelled', async () => {
-    __mockConnectionPrompt.mockResolvedValue({ id: '1', hostname: 'old', group: 'g', credentialUsername: 'u' })
-    __mockHostnamePrompt.mockResolvedValue('newhost')
-    __mockGroupPrompt.mockResolvedValue({ cancelled: false, value: 'newgroup' })
-    __mockCredentialPrompt.mockResolvedValue(undefined)
+    __mockPrompts.connection.select.mockResolvedValue({ id: '1', hostname: 'old', group: 'g', credentialUsername: 'u' })
+    __mockPrompts.connection.hostname.mockResolvedValue('newhost')
+    __mockPrompts.connection.group.mockResolvedValue({ cancelled: false, value: 'newgroup' })
+    __mockPrompts.credential.select.mockResolvedValue(undefined)
     await updateConnectionCommand(context)
-    expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+    expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
   })
 
   it('handles errors with handleCommandError', async () => {
     const error = new Error('fail')
-    __mockConnectionPrompt.mockRejectedValue(error)
+    __mockPrompts.connection.select.mockRejectedValue(error)
     await expect(updateConnectionCommand(context)).resolves.toBeUndefined()
     expect(mockHandleCommandError).toHaveBeenCalledWith('update connection', error)
   })
@@ -100,14 +100,14 @@ describe('updateGroupCredentialsCommand', () => {
       { id: '1', group: 'g', credentialUsername: 'old' },
       { id: '2', group: 'other', credentialUsername: 'old2' }
     ]
-    __mockCredentialPrompt.mockResolvedValue('newuser')
-    __mockGetAllConnections.mockReturnValue(fakeConnections)
-    __mockUpdateAllConnections.mockResolvedValue(undefined)
+    __mockPrompts.credential.select.mockResolvedValue('newuser')
+    __mockStorage.connection.getAll.mockReturnValue(fakeConnections)
+    __mockStorage.connection.updateAll.mockResolvedValue(undefined)
 
     await updateGroupCredentialsCommand(context, groupItem as any)
 
-    expect(__mockCredentialPrompt).toHaveBeenCalledWith(context, undefined)
-    expect(__mockUpdateAllConnections).toHaveBeenCalledWith(context, [
+    expect(__mockPrompts.credential.select).toHaveBeenCalledWith(context, undefined)
+    expect(__mockStorage.connection.updateAll).toHaveBeenCalledWith(context, [
       { id: '1', group: 'g', credentialUsername: 'newuser' },
       { id: '2', group: 'other', credentialUsername: 'old2' }
     ])
@@ -122,15 +122,15 @@ describe('updateGroupCredentialsCommand', () => {
 
   it('does nothing if credential prompt is cancelled', async () => {
     const groupItem = { type: 'group', group: 'g' }
-    __mockCredentialPrompt.mockResolvedValue(undefined)
+    __mockPrompts.credential.select.mockResolvedValue(undefined)
     await updateGroupCredentialsCommand(context, groupItem as any)
-    expect(__mockUpdateAllConnections).not.toHaveBeenCalled()
+    expect(__mockStorage.connection.updateAll).not.toHaveBeenCalled()
   })
 
   it('handles errors with handleCommandError', async () => {
     const groupItem = { type: 'group', group: 'g' }
     const error = new Error('fail')
-    __mockCredentialPrompt.mockRejectedValue(error)
+    __mockPrompts.credential.select.mockRejectedValue(error)
     await expect(updateGroupCredentialsCommand(context, groupItem as any)).resolves.toBeUndefined()
     expect(mockHandleCommandError).toHaveBeenCalledWith('update group credentials', error)
   })
