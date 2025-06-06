@@ -1,28 +1,28 @@
 import { vi } from 'vitest'
 
-export const __mockConnectionPrompt = vi.fn()
-export const __mockHostnamePrompt = vi.fn()
-export const __mockGroupPrompt = vi.fn()
-export const __mockCredentialPrompt = vi.fn()
-//export const __mockExportPrompt = vi.fn()
-export const __mockExportFilePrompt = vi.fn()
-export const __mockImportFilePrompt = vi.fn()
-export const __mockEditDetailsPrompt = vi.fn()
-
+const promptMocks = {
+  connection: {
+    select: vi.fn(),
+    hostname: vi.fn(),
+    group: vi.fn(),
+    exportFile: vi.fn(),
+    importFile: vi.fn(),
+  },
+  credential: {
+    select: vi.fn(),
+    details: vi.fn(),
+    editDetails: vi.fn(),
+  },
+}
 
 vi.mock('@/prompts', () => ({
-  Prompts: {
-    connection: {
-      select: __mockConnectionPrompt,
-      hostname: __mockHostnamePrompt,
-      group: __mockGroupPrompt,
-      exportFile: __mockExportFilePrompt,
-      importFile: __mockImportFilePrompt
-    },
-    credential: {
-      select: __mockCredentialPrompt,
-      details: __mockCredentialPrompt,
-      editDetails: __mockEditDetailsPrompt,
-    },
-  },
+  Prompts: promptMocks,
 }))
+
+export const __mockPrompts = promptMocks
+export const __mockConnectionPrompt = promptMocks.connection.select
+export const __mockHostnamePrompt = promptMocks.connection.hostname
+export const __mockGroupPrompt = promptMocks.connection.group
+export const __mockCredentialPrompt = promptMocks.credential.select
+export const __mockExportFilePrompt = promptMocks.connection.exportFile
+export const __mockImportFilePrompt = promptMocks.connection.importFile

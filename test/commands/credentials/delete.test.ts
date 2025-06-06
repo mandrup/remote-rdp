@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import * as vscode from 'vscode'
 import deleteCredentialCommand from '@/commands/credentials/delete'
 import { COMMAND_IDS } from '@/constants'
-import { __mockEditDetailsPrompt } from '#mocks/prompts'
+import { __mockPrompts } from '#mocks/prompts'
 import { __mockGetAllConnections } from '#mocks/storage'
 import { Storage } from '@/storage'
 
@@ -23,8 +23,6 @@ describe('deleteCredentialCommand', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockHandleCommandError = vi.fn()
-    // Use the correct editDetails prompt mock
-    // __mockEditDetailsPrompt is now the correct mock for Prompts.credential.editDetails
     __mockDeleteCredential = vi.fn()
     __mockClearAllCredential = vi.fn()
     Storage.credential.delete = __mockDeleteCredential
@@ -37,14 +35,14 @@ describe('deleteCredentialCommand', () => {
       { id: '1', credentialUsername: 'user' },
       { id: '2', credentialUsername: 'other' }
     ]
-    __mockEditDetailsPrompt.mockResolvedValue(credential)
+    __mockPrompts.credential.editDetails.mockResolvedValue(credential)
     __mockGetAllConnections.mockReturnValue(connections)
     __mockDeleteCredential.mockResolvedValue(undefined)
     __mockClearAllCredential.mockResolvedValue(undefined)
 
     await deleteCredentialCommand(context)
 
-    expect(__mockEditDetailsPrompt).toHaveBeenCalledWith(context, undefined)
+    expect(__mockPrompts.credential.editDetails).toHaveBeenCalledWith(context, undefined)
     expect(__mockDeleteCredential).toHaveBeenCalledWith(context, 'user')
     expect(__mockClearAllCredential).toHaveBeenCalledWith(context, 'user')
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.credential.refresh)
@@ -56,13 +54,13 @@ describe('deleteCredentialCommand', () => {
     const connections = [
       { id: '1', credentialUsername: 'other' }
     ]
-    __mockEditDetailsPrompt.mockResolvedValue(credential)
+    __mockPrompts.credential.editDetails.mockResolvedValue(credential)
     __mockGetAllConnections.mockReturnValue(connections)
     __mockDeleteCredential.mockResolvedValue(undefined)
 
     await deleteCredentialCommand(context)
 
-    expect(__mockEditDetailsPrompt).toHaveBeenCalledWith(context, undefined)
+    expect(__mockPrompts.credential.editDetails).toHaveBeenCalledWith(context, undefined)
     expect(__mockDeleteCredential).toHaveBeenCalledWith(context, 'user')
     expect(__mockClearAllCredential).not.toHaveBeenCalled()
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.credential.refresh)
@@ -70,7 +68,7 @@ describe('deleteCredentialCommand', () => {
   })
 
   it('does nothing if editDetails prompt is cancelled', async () => {
-    __mockEditDetailsPrompt.mockResolvedValue(undefined)
+    __mockPrompts.credential.editDetails.mockResolvedValue(undefined)
     await deleteCredentialCommand(context)
     expect(__mockDeleteCredential).not.toHaveBeenCalled()
     expect(__mockClearAllCredential).not.toHaveBeenCalled()
@@ -79,7 +77,7 @@ describe('deleteCredentialCommand', () => {
 
   it('handles errors with handleCommandError', async () => {
     const error = new Error('fail')
-    __mockEditDetailsPrompt.mockRejectedValue(error)
+    __mockPrompts.credential.editDetails.mockRejectedValue(error)
     await deleteCredentialCommand(context)
     expect(mockHandleCommandError).toHaveBeenCalledWith('remove credential', error)
   })

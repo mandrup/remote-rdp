@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import * as vscode from 'vscode'
 import updateCredentialCommand from '@/commands/credentials/update'
 import { COMMAND_IDS } from '@/constants'
-import { __mockEditDetailsPrompt, __mockCredentialPrompt } from '#mocks/prompts'
+import { __mockPrompts } from '#mocks/prompts'
 import { __mockUpdate, __mockUpdateAllCredential } from '#mocks/storage'
 
 let mockHandleCommandError: ReturnType<typeof vi.fn>
@@ -25,15 +25,15 @@ describe('updateCredentialCommand', () => {
   it('updates credential and connections when prompts succeed', async () => {
     const credential = { id: 'id1', username: 'olduser' }
     const details = { username: 'newuser', password: 'pass' }
-    __mockEditDetailsPrompt.mockResolvedValue(credential)
-    __mockCredentialPrompt.mockResolvedValue(details)
+    __mockPrompts.credential.editDetails.mockResolvedValue(credential)
+    __mockPrompts.credential.details.mockResolvedValue(details) // <-- changed
     __mockUpdate.mockResolvedValue(undefined)
     __mockUpdateAllCredential.mockResolvedValue(undefined)
 
     await updateCredentialCommand(context)
 
-    expect(__mockEditDetailsPrompt).toHaveBeenCalledWith(context, undefined)
-    expect(__mockCredentialPrompt).toHaveBeenCalledWith('olduser')
+    expect(__mockPrompts.credential.editDetails).toHaveBeenCalledWith(context, undefined)
+    expect(__mockPrompts.credential.details).toHaveBeenCalledWith('olduser') // <-- changed
     expect(__mockUpdate).toHaveBeenCalledWith(context, 'id1', 'newuser', 'pass')
     expect(__mockUpdateAllCredential).toHaveBeenCalledWith(context, 'olduser', 'newuser')
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.credential.refresh)
@@ -41,17 +41,17 @@ describe('updateCredentialCommand', () => {
   })
 
   it('does nothing if editDetails prompt is cancelled', async () => {
-    __mockEditDetailsPrompt.mockResolvedValue(undefined)
+    __mockPrompts.credential.editDetails.mockResolvedValue(undefined)
     await updateCredentialCommand(context)
-    expect(__mockCredentialPrompt).not.toHaveBeenCalled()
+    expect(__mockPrompts.credential.select).not.toHaveBeenCalled()
     expect(__mockUpdate).not.toHaveBeenCalled()
     expect(__mockUpdateAllCredential).not.toHaveBeenCalled()
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled()
   })
 
   it('does nothing if details prompt is cancelled', async () => {
-    __mockEditDetailsPrompt.mockResolvedValue({ id: 'id1', username: 'olduser' })
-    __mockCredentialPrompt.mockResolvedValue(undefined)
+    __mockPrompts.credential.editDetails.mockResolvedValue({ id: 'id1', username: 'olduser' })
+    __mockPrompts.credential.details.mockResolvedValue(undefined) // <-- use details, not select
     await updateCredentialCommand(context)
     expect(__mockUpdate).not.toHaveBeenCalled()
     expect(__mockUpdateAllCredential).not.toHaveBeenCalled()
@@ -60,7 +60,7 @@ describe('updateCredentialCommand', () => {
 
   it('handles errors with handleCommandError', async () => {
     const error = new Error('fail')
-    __mockEditDetailsPrompt.mockRejectedValue(error)
+    __mockPrompts.credential.editDetails.mockRejectedValue(error)
     await updateCredentialCommand(context)
     expect(mockHandleCommandError).toHaveBeenCalledWith('update credential', error)
   })
