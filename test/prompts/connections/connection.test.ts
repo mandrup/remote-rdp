@@ -22,6 +22,7 @@ describe('promptForConnection', () => {
   afterEach(() => {
     mockShowQuickPick.mockReset()
     mockShowInputBox.mockReset()
+    __mockStorage.connection.getAll.mockReset()
   })
 
   it('returns connection by item id if provided', async () => {

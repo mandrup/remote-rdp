@@ -1,24 +1,23 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 let mockHandleCommandError: ReturnType<typeof vi.fn>
+let mockIsConnectionModelArray: ReturnType<typeof vi.fn>
+
 vi.mock('@/commands/index', () => ({
   handleCommandError: (...args: any[]) => mockHandleCommandError(...args)
 }))
-
+vi.mock('@/models/connection', () => ({
+  isConnectionModelArray: (...args: any[]) => mockIsConnectionModelArray(...args)
+}))
 import '#mocks/vscode'
 import '#mocks/storage'
 import '#mocks/prompts'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import importConnectionsCommand from '@/commands/connections/import'
 import * as vscode from 'vscode'
 import { __mockPrompts } from '#mocks/prompts'
 import { __mockStorage } from '#mocks/storage'
 
-const mockReadFile = vscode.workspace.fs.readFile as any
-
-let mockIsConnectionModelArray: ReturnType<typeof vi.fn>
-
-vi.mock('@/models/connection', () => ({
-  isConnectionModelArray: (...args: any[]) => mockIsConnectionModelArray(...args)
-}))
+const mockReadFile = vscode.workspace.fs.readFile as ReturnType<typeof vi.fn> | any
 
 describe('importConnectionsCommand', () => {
   const context = {} as any
