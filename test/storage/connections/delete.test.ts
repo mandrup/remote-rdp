@@ -10,9 +10,6 @@ describe('deleteConnection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
-  afterEach(() => {
-    // No spies to restore
-  })
 
   it('removes the connection with the given id and updates storage', async () => {
     const connections = [

@@ -16,9 +16,7 @@ function isStoredCredentialModelArray(value: unknown): value is StoredCredential
                 typeof item === 'object' &&
                 item !== null &&
                 typeof (item as any).id === 'string' &&
-                typeof (item as any).username === 'string' &&
-                typeof (item as any).created_at === 'string' &&
-                (typeof (item as any).modified_at === 'string' || (item as any).modified_at === undefined)
+                typeof (item as any).username === 'string'
         )
 }
 

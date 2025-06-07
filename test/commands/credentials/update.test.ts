@@ -26,14 +26,14 @@ describe('updateCredentialCommand', () => {
     const credential = { id: 'id1', username: 'olduser' }
     const details = { username: 'newuser', password: 'pass' }
     __mockPrompts.credential.editDetails.mockResolvedValue(credential)
-    __mockPrompts.credential.details.mockResolvedValue(details) // <-- changed
+    __mockPrompts.credential.details.mockResolvedValue(details)
     __mockStorage.credential.update.mockResolvedValue(undefined)
     __mockStorage.connection.updateAllCredential.mockResolvedValue(undefined)
 
     await updateCredentialCommand(context)
 
     expect(__mockPrompts.credential.editDetails).toHaveBeenCalledWith(context, undefined)
-    expect(__mockPrompts.credential.details).toHaveBeenCalledWith('olduser') // <-- changed
+    expect(__mockPrompts.credential.details).toHaveBeenCalledWith('olduser')
     expect(__mockStorage.credential.update).toHaveBeenCalledWith(context, 'id1', 'newuser', 'pass')
     expect(__mockStorage.connection.updateAllCredential).toHaveBeenCalledWith(context, 'olduser', 'newuser')
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith(COMMAND_IDS.credential.refresh)
@@ -51,7 +51,7 @@ describe('updateCredentialCommand', () => {
 
   it('does nothing if details prompt is cancelled', async () => {
     __mockPrompts.credential.editDetails.mockResolvedValue({ id: 'id1', username: 'olduser' })
-    __mockPrompts.credential.details.mockResolvedValue(undefined) // <-- use details, not select
+    __mockPrompts.credential.details.mockResolvedValue(undefined)
     await updateCredentialCommand(context)
     expect(__mockStorage.credential.update).not.toHaveBeenCalled()
     expect(__mockStorage.connection.updateAllCredential).not.toHaveBeenCalled()

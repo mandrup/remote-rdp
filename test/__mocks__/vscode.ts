@@ -1,6 +1,5 @@
 import { vi } from 'vitest'
 
-// Window API mocks
 export const mockShowWarningMessage = vi.fn()
 export const mockShowQuickPick = vi.fn()
 export const mockShowInputBox = vi.fn()
@@ -8,7 +7,6 @@ export const mockShowSaveDialog = vi.fn()
 export const mockShowOpenDialog = vi.fn()
 export const mockShowErrorMessage = vi.fn()
 
-// EventEmitter mock
 class MockEventEmitter {
   private listeners: Array<(e: any) => any> = []
   fire(event: any) { this.listeners.forEach(fn => fn(event)) }
@@ -16,10 +14,8 @@ class MockEventEmitter {
   dispose() { this.listeners = [] }
 }
 
-// ThemeIcon mock
 class MockThemeIcon { constructor(public id: string) {} }
 
-// TreeItem mock
 class MockTreeItem {
   label: string | undefined
   collapsibleState: any
@@ -33,7 +29,6 @@ class MockTreeItem {
   }
 }
 
-// DataTransfer mocks
 class MockDataTransfer {
   private map = new Map<string, any>()
   get(type: string) { return this.map.get(type) }
@@ -44,10 +39,8 @@ class MockDataTransferItem {
   async asString() { return this.value }
 }
 
-// CancellationToken mock
 class MockCancellationToken { isCancellationRequested = false }
 
-// Main VS Code API mock
 vi.mock('vscode', () => ({
   window: {
     showWarningMessage: mockShowWarningMessage,

@@ -51,7 +51,6 @@ describe('ConnectionsProvider', () => {
         ]
         __mockStorage.connection.getAll.mockReturnValue(connections)
         const children = await provider.getChildren()
-        // Should have 1 ungrouped and 1 group
         expect(children.some(c => c.type === 'connection')).toBe(true)
         expect(children.some(c => c.type === 'group')).toBe(true)
     })
@@ -63,7 +62,7 @@ describe('ConnectionsProvider', () => {
             { id: '2', hostname: 'a', group, credentialUsername: 'u2', created_at: 'd' },
         ]
         __mockStorage.connection.getAll.mockReturnValue(connections)
-        await provider.getChildren() // triggers updateGroups
+        await provider.getChildren()
         const groupItem = (await provider.getChildren()).find((c: any) => c.type === 'group')
         const groupChildren = await provider.getChildren(groupItem)
         expect((groupChildren[0] as any).connection?.hostname).toBe('a')

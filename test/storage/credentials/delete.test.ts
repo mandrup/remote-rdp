@@ -16,9 +16,6 @@ describe('deleteCredential', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
-  afterEach(() => {
-    // No spies to restore
-  })
 
   it('deletes credential and updates storage/secrets', async () => {
     const credentials = [

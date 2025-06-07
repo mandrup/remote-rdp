@@ -33,14 +33,14 @@ export function isConnectionModel(value: unknown): value is ConnectionModel {
     typeof obj.hostname === 'string' &&
     (typeof obj.group === 'string' || obj.group === undefined) &&
     (typeof obj.credentialUsername === 'string' || obj.credentialUsername === undefined) &&
-    typeof obj.created_at === 'string' &&
-    (typeof obj.modified_at === 'string' || obj.modified_at === undefined)
+    typeof obj.created_at === 'string'
 
   if (!isValid) {
-    console.warn('Invalid CredentialModel:', value)
+    console.warn('Invalid ConnectionModel:', value)
+    return false
   }
 
-  return isValid
+  return true
 }
 
 export function isConnectionModelArray(value: unknown): value is ConnectionModel[] {

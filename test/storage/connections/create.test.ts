@@ -14,7 +14,6 @@ describe('createConnection', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     dateSpy = vi.spyOn(global, 'Date').mockImplementation(() => ({ toISOString: () => now }) as any)
-    // Mock randomUUID
     if (globalThis.crypto && 'randomUUID' in globalThis.crypto) {
       originalRandomUUID = globalThis.crypto.randomUUID
       globalThis.crypto.randomUUID = vi.fn(() => '123e4567-e89b-12d3-a456-426614174000') as () => `${string}-${string}-${string}-${string}-${string}`
@@ -22,7 +21,6 @@ describe('createConnection', () => {
       // @ts-ignore
       globalThis.crypto = { randomUUID: vi.fn(() => '123e4567-e89b-12d3-a456-426614174000') }
     }
-    // Mock isConnectionModel
     const mod = await import('@/models/connection')
     __mockIsConnectionModel = vi.spyOn(mod, 'isConnectionModel').mockImplementation(() => true)
   })

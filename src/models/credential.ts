@@ -17,14 +17,15 @@ export function isCredentialModel(value: unknown): value is CredentialModel {
     const isValid =
         typeof obj.id === 'string' &&
         typeof obj.username === 'string' &&
-        typeof obj.created_at === 'string' &&
-        (typeof obj.modified_at === 'string' || obj.modified_at === undefined)
+        typeof obj.password === 'string' &&
+        typeof obj.created_at === 'string'
 
     if (!isValid) {
         console.warn('Invalid CredentialModel:', value)
+        return false
     }
 
-    return isValid
+    return true
 }
 
 export function isCredentialModelArray(value: unknown): value is CredentialModel[] {

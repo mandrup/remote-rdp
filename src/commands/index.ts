@@ -24,7 +24,6 @@ export function registerCommands(context: vscode.ExtensionContext): void {
     const register = vscode.commands.registerCommand
     const sub = context.subscriptions
 
-    // Connections
     sub.push(register(COMMAND_IDS.connection.create, () => createConnectionCommand(context)))
     sub.push(register(COMMAND_IDS.connection.update, (item?: vscode.TreeItem) => updateConnectionCommand(context, item)))
     sub.push(register(COMMAND_IDS.connection.delete, (item?: vscode.TreeItem) => deleteConnectionCommand(context, item)))
@@ -43,7 +42,6 @@ export function registerCommands(context: vscode.ExtensionContext): void {
         (item?: ConnectionTreeItem) => updateGroupCredentialsCommand(context, item)
     ))
 
-    // Credentials
     sub.push(register(COMMAND_IDS.credential.create, () => createCredentialCommand(context)))
     sub.push(register(COMMAND_IDS.credential.update, (item?: vscode.TreeItem) => updateCredentialCommand(context, item)))
     sub.push(register(COMMAND_IDS.credential.delete, (item?: vscode.TreeItem) => deleteCredentialCommand(context, item)))
