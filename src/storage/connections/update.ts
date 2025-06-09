@@ -2,44 +2,64 @@ import * as vscode from 'vscode'
 import { PREFIXES } from '../../constants'
 import { Storage } from '..'
 import { ConnectionModel, isConnectionModelArray } from '../../models/connection'
+import { clearCredentialFromConnections, findConnectionsByCredentialId, updateConnectionsCredentialId } from '../shared'
+import { ErrorFactory } from '../../errors'
 
 export async function updateConnections(
     context: vscode.ExtensionContext,
     connections: ConnectionModel[]
 ): Promise<void> {
-    if (!isConnectionModelArray(connections)) {
-        throw new Error('Invalid connection data array')
+    if (!context) {
+        throw ErrorFactory.validation.contextRequired()
+    }
+    if (!Array.isArray(connections)) {
+        throw ErrorFactory.validation.connectionsArrayRequired(connections)
     }
 
+    if (!isConnectionModelArray(connections)) {
+        throw ErrorFactory.storage.invalidConnectionArray()
+    }
     await context.globalState.update(PREFIXES.connection, connections)
-
     const stored = context.globalState.get<unknown>(PREFIXES.connection)
     if (!isConnectionModelArray(stored)) {
-        throw new Error('Stored connection data is invalid after update')
+        throw ErrorFactory.storage.storedDataInvalid()
     }
 }
 
 export async function updateConnectionsCredential(
     context: vscode.ExtensionContext,
-    oldUsername: string,
-    newUsername: string
+    oldCredentialId: string,
+    newCredentialId: string
 ): Promise<void> {
-    const connections = Storage.connection.readAll(context)
-    const updated = connections.map(connection =>
-        connection.credentialUsername === oldUsername ? { ...connection, credentialUsername: newUsername } : connection
-    )
-    await updateConnections(context, updated)
+    if (!context) {
+        throw ErrorFactory.validation.contextRequired()
+    }
+    if (!oldCredentialId || typeof oldCredentialId !== 'string' || oldCredentialId.trim().length === 0) {
+        throw ErrorFactory.validation.oldCredentialIdRequired(oldCredentialId)
+    }
+    if (!newCredentialId || typeof newCredentialId !== 'string' || newCredentialId.trim().length === 0) {
+        throw ErrorFactory.validation.newCredentialIdRequired(newCredentialId)
+    }
+
+    const connections = Storage.connection.getAll(context) || []
+    const updatedConnections = updateConnectionsCredentialId(connections, oldCredentialId, newCredentialId)
+    await updateConnections(context, updatedConnections)
 }
 
 export async function clearConnectionsCredential(
     context: vscode.ExtensionContext,
-    username: string
+    credentialId: string
 ): Promise<number> {
-    const connections = Storage.connection.readAll(context)
-    const affectedCount = connections.filter(connection => connection.credentialUsername === username).length
-    const updated = connections.map(connection =>
-        connection.credentialUsername === username ? { ...connection, credentialUsername: undefined } : connection
-    )
-    await updateConnections(context, updated)
-    return affectedCount
+    if (!context) {
+        throw ErrorFactory.validation.contextRequired()
+    }
+    if (!credentialId || typeof credentialId !== 'string' || credentialId.trim().length === 0) {
+        throw ErrorFactory.validation.credentialIdRequired(credentialId)
+    }
+
+    const connections = Storage.connection.getAll(context) || []
+    const affectedConnections = findConnectionsByCredentialId(connections, credentialId)
+    const updatedConnections = clearCredentialFromConnections(connections, credentialId)
+    await updateConnections(context, updatedConnections)
+    return affectedConnections.length
 }

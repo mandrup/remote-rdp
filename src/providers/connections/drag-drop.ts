@@ -2,12 +2,16 @@ import * as vscode from 'vscode'
 import { MIME_TYPES } from '../../constants'
 import { Storage } from '../../storage'
 import { ConnectionTreeItem, ConnectionItem, ConnectionGroupItem } from './items'
+import { handleDragDropError } from '../shared'
 
 export class ConnectionsDragDropController implements vscode.TreeDragAndDropController<ConnectionTreeItem> {
     readonly dragMimeTypes = [MIME_TYPES.connection]
     readonly dropMimeTypes = [MIME_TYPES.connection]
 
-    constructor(private readonly context: vscode.ExtensionContext, private readonly refresh: () => void) { }
+    constructor(
+        private readonly context: vscode.ExtensionContext,
+        private readonly refresh: () => void
+    ) {}
 
     getDragMimeTypes(source: ConnectionTreeItem[]): string[] {
         return source.every(item => item.type === 'connection') ? [MIME_TYPES.connection] : []
@@ -44,21 +48,22 @@ export class ConnectionsDragDropController implements vscode.TreeDragAndDropCont
             .filter((item): item is ConnectionItem => item.type === 'connection')
             .map(item => item.connection)
 
-        if (!draggedConnections.length) { return }
-
-        const allConnections = Storage.connection.readAll(this.context)
-        const updated = allConnections.map(conn =>
-            draggedConnections.some(d => d.id === conn.id)
-                ? { ...conn, group: targetGroup === 'Ungrouped' ? undefined : targetGroup }
-                : conn
-        )
+        if (!draggedConnections.length) {
+            return
+        }
 
         try {
-            await Storage.connection.updateAll(this.context, updated)
+            const allConnections = Storage.connection.getAll(this.context)
+            const now = new Date().toISOString()
+            const updatedConnections = allConnections.map(connection =>
+                draggedConnections.some(d => d.id === connection.id)
+                    ? { ...connection, group: targetGroup === 'Ungrouped' ? undefined : targetGroup, modifiedAt: now }
+                    : connection
+            )
+            await Storage.connection.updateAll(this.context, updatedConnections)
             this.refresh()
         } catch (err) {
-            console.error('Failed to update connections:', err)
-            vscode.window.showErrorMessage('Failed to update connection.')
+            handleDragDropError('update connections', err, 'Failed to update connection.')
         }
     }
 
@@ -79,7 +84,7 @@ export class ConnectionsDragDropController implements vscode.TreeDragAndDropCont
         try {
             dataTransfer.set(MIME_TYPES.connection, new vscode.DataTransferItem(JSON.stringify(items)))
         } catch (err) {
-            console.error('Failed to handle drag:', err)
+            handleDragDropError('handle drag', err, 'Failed to handle drag operation.')
         }
     }
 }

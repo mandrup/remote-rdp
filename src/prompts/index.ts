@@ -1,21 +1,21 @@
-import connectionPrompt from './connections/connection'
-import hostnamePrompt from './connections/hostname'
-import groupPrompt from './connections/group'
-import importPrompt from './connections/import'
-import exportPrompt from './connections/export'
+import { promptForConnection } from './connections/connection'
+import promptForHostname from './connections/hostname'
+import { promptForGroup } from './connections/group'
+import { promptForImportFile } from './connections/import'
+import { promptForExportFile } from './connections/export'
 import { credentialDetailsPrompt, credentialPrompt, editCredentialDetailsPrompt } from './credentials/credential'
 
 export const Prompts = {
     connection: {
-        connection: connectionPrompt,
-        hostname: hostnamePrompt,
-        group: groupPrompt,
-        import: importPrompt,
-        export: exportPrompt
+        select: promptForConnection,
+        hostname: promptForHostname,
+        group: promptForGroup,
+        importFile: promptForImportFile,
+        exportFile: promptForExportFile
     },
     credential: {
-        credential: credentialPrompt,
-        credentialDetails: credentialDetailsPrompt,
-        editCredentialDetails: editCredentialDetailsPrompt,
+        select: credentialPrompt,
+        details: credentialDetailsPrompt,
+        editDetails: editCredentialDetailsPrompt,
     }
 }

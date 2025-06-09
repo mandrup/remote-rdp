@@ -1,20 +1,29 @@
 import * as vscode from 'vscode'
 import { PREFIXES } from '../../constants'
 import { Storage } from '..'
+import { ErrorFactory } from '../../errors'
 
-export default async function deleteCredential(
-    context: vscode.ExtensionContext,
-    username: string
-): Promise<void> {
-    const existing = await Storage.credential.readAll(context)
-    const toDelete = existing.find(c => c.username === username)
+export async function deleteCredential(context: vscode.ExtensionContext, id: string): Promise<void> {
+    if (!context) {
+        throw ErrorFactory.validation.contextRequired()
+    }
+    if (!id || typeof id !== 'string' || id.trim().length === 0) {
+        throw ErrorFactory.validation.stringRequired('Credential ID', id)
+    }
 
-    if (!toDelete) {
+    const credentials = await Storage.credential.getAll(context)
+    if (!credentials.find(c => c.id === id)) {
         return
     }
 
-    const updated = existing.filter(c => c.username !== username)
-    const metadata = updated.map(({ id, username }) => ({ id, username }))
-    await context.globalState.update(PREFIXES.credential, metadata)
-    await context.secrets.delete(`${PREFIXES.credential}.secret.${toDelete.id}`)
+    const remainingCredentials = credentials.filter(c => c.id !== id)
+    const credentialSummaries = remainingCredentials.map(({ id, username, createdAt, modifiedAt }) => ({
+        id,
+        username,
+        created_at: createdAt,
+        modified_at: modifiedAt
+    }))
+
+    await context.globalState.update(PREFIXES.credential, credentialSummaries)
+    await context.secrets.delete(`${PREFIXES.credential}.secret.${id}`)
 }

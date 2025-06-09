@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
-#  push:
-#    branches:
-#      - main
+  release:
+    types: [published]
 
 jobs:
   frontend:
@@ -32,13 +31,15 @@ jobs:
         run: npm run build
 
       - name: Run tests
-        run: xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24' npm test
+        run: xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24' npm run test
 
       - name: Package extension
+        if: github.event_name == 'release'
         run: npx vsce package
 
       - name: Upload VSIX as artifact
+        if: github.event_name == 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: vscode-extension
+          name: vscode-extension-${{ github.ref_name }}
           path: '*.vsix'

@@ -2,11 +2,11 @@ import * as vscode from 'vscode'
 import { Storage } from '../../storage'
 import type { ConnectionModel } from '../../models/connection'
 
-export default async function connectionPrompt(
+export async function promptForConnection(
     context: vscode.ExtensionContext,
     item?: vscode.TreeItem
 ): Promise<ConnectionModel | undefined> {
-    const connections = Storage.connection.readAll(context)
+    const connections = Storage.connection.getAll(context)
 
     if (item?.id && typeof item.id === 'string') {
         return connections.find(c => c.id === item.id)
@@ -21,8 +21,8 @@ export default async function connectionPrompt(
         connections.map(connection => ({
             label: connection.hostname,
             description: connection.group ? `Group: ${connection.group}` : undefined,
-            detail: connection.credentialUsername
-                ? `Username: ${connection.credentialUsername}`
+            detail: connection.credentialId
+                ? `Credential ID: ${connection.credentialId}`
                 : 'No credential',
             id: connection.id,
         })),

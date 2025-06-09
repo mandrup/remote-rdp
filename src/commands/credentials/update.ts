@@ -1,31 +1,24 @@
 import * as vscode from 'vscode'
-import { MESSAGES, COMMAND_IDS } from '../../constants'
 import { Storage } from '../../storage'
 import { Prompts } from '../../prompts'
+import { handleCommandError, refreshViews, validatePromptResult } from '../shared'
 
-export default async function updateCredentialCommand(
-    context: vscode.ExtensionContext,
-    item?: vscode.TreeItem
-): Promise<void> {
+export default async function updateCredentialCommand(context: vscode.ExtensionContext, item?: vscode.TreeItem): Promise<void> {
     try {
-        const credential = await Prompts.credential.editCredentialDetails(context, item)
-        if (!credential) {
+        const credential = await Prompts.credential.editDetails(context, item)
+        if (!validatePromptResult(credential)) {
             return
         }
 
-        const details = await Prompts.credential.credentialDetails(credential.username)
-        if (!details) {
+        const details = await Prompts.credential.details(credential.username)
+        if (!validatePromptResult(details)) {
             return
         }
 
-        await Storage.credential.updateUsername(context, credential.id, details.username, details.password)
+        await Storage.credential.update(context, credential.id, details.username, details.password)
 
-        await Storage.connection.updateAllCredential(context, credential.username, details.username)
-
-        await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)
-        await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
+        await refreshViews()
     } catch (error) {
-        console.error('Failed to update credential:', error)
-        vscode.window.showErrorMessage(MESSAGES.operationFailed('update credential', error))
+        await handleCommandError('update credential', error)
     }
 }

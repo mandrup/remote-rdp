@@ -3,11 +3,11 @@ import { Storage } from '../../storage'
 
 export type GroupPromptResult = { cancelled: true } | { cancelled: false; value: string | undefined }
 
-export default async function groupPrompt(
+export async function promptForGroup(
     context: vscode.ExtensionContext,
     current?: string
 ): Promise<GroupPromptResult> {
-    const connections = Storage.connection.readAll(context)
+    const connections = Storage.connection.getAll(context)
     const groups = Array.from(
         new Set(connections.map(connection => connection.group?.trim()).filter((g): g is string => !!g))
     )
@@ -16,7 +16,7 @@ export default async function groupPrompt(
         return promptNewGroupInput(current)
     }
 
-    const items = [
+    const items: vscode.QuickPickItem[] = [
         ...groups.map(g => ({
             label: g,
             description: g === current ? '(current)' : undefined,

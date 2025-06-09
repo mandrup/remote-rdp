@@ -1,36 +1,28 @@
 import * as vscode from 'vscode'
 import { Storage } from '../../storage'
-import { MESSAGES, COMMAND_IDS } from '../../constants'
 import { Prompts } from '../../prompts'
 import type { ConnectionModel } from '../../models/connection'
+import { handleCommandError, refreshViews, validatePromptResult, hasItems } from '../shared'
+import { findConnectionsByCredentialId } from '../../storage/shared'
 
-export default async function deleteCredentialCommand(
-  context: vscode.ExtensionContext,
-  item?: vscode.TreeItem
-): Promise<void> {
+export default async function deleteCredentialCommand(context: vscode.ExtensionContext, item?: vscode.TreeItem): Promise<void> {
   try {
-    const credential = await Prompts.credential.editCredentialDetails(context, item)
-    if (!credential) {
+    const credential = await Prompts.credential.editDetails(context, item)
+    if (!validatePromptResult(credential)) {
       return
     }
 
-    const connections = Storage.connection.readAll(context)
-    const affectedConnections = connections.filter(
-      (conn: ConnectionModel) => conn.credentialUsername === credential.username
-    )
+    const connections = Storage.connection.getAll(context)
+    const affectedConnections = findConnectionsByCredentialId(connections, credential.id)
 
-    await Storage.credential.delete(context, credential.username)
+    await Storage.credential.delete(context, credential.id)
 
-    if (affectedConnections.length > 0) {
-      await Storage.connection.clearAllCredential(context, credential.username)
+    if (hasItems(affectedConnections)) {
+      await Storage.connection.clearAllCredential(context, credential.id)
     }
 
-    await vscode.commands.executeCommand(COMMAND_IDS.credential.refresh)
-    await vscode.commands.executeCommand(COMMAND_IDS.connection.refresh)
+    await refreshViews()
   } catch (error) {
-    console.error('Failed to remove credential:', error)
-    vscode.window.showErrorMessage(
-      MESSAGES.operationFailed('remove credential', error)
-    )
+    await handleCommandError('remove credential', error)
   }
 }

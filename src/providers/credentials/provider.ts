@@ -4,6 +4,12 @@ import { Storage } from '../../storage'
 import { COMMAND_IDS } from '../../constants'
 import { CredentialTreeItem, CredentialItem, EmptyItem } from './items'
 import { CredentialModel } from '../../models/credential'
+import { 
+    createCredentialTreeItem, 
+    createEmptyTreeItem,
+    sortCredentialsByUsername,
+    handleProviderError
+} from '../shared'
 
 export class CredentialsProvider extends BaseProvider<CredentialTreeItem> {
     constructor(private readonly context: vscode.ExtensionContext) {
@@ -27,35 +33,30 @@ export class CredentialsProvider extends BaseProvider<CredentialTreeItem> {
         }
 
         try {
-            const credentials = await Storage.credential.readAll(this.context)
-            return credentials.length
-                ? credentials
-                    .sort((a, b) => a.username.localeCompare(b.username))
-                    .map(c => this.createCredentialItem(c))
-                : [this.createEmptyItem()]
+            const credentials = await Storage.credential.getAll(this.context)
+            if (credentials.length === 0) {
+                return [this.createEmptyItem()]
+            }
+            return sortCredentialsByUsername(credentials)
+                .map(c => this.createCredentialTreeItem(c))
         } catch (error) {
-            console.error('Failed to get credentials:', error)
-            vscode.window.showErrorMessage('Failed to load credentials.')
-            return []
+            return handleProviderError('get credentials', error, 'Failed to load credentials.')
         }
     }
 
-    private createCredentialItem(credential: CredentialModel): CredentialItem {
-        const item = new vscode.TreeItem(credential.username, vscode.TreeItemCollapsibleState.None) as CredentialItem
-        item.id = credential.id
+    private createCredentialTreeItem(credential: CredentialModel): CredentialItem {
+        const item = createCredentialTreeItem(credential) as CredentialItem
         item.type = 'credential'
         item.credential = credential
-        item.contextValue = 'credentialItem'
-        item.iconPath = new vscode.ThemeIcon('key')
         return item
     }
 
     private createEmptyItem(): EmptyItem {
-        const item = new vscode.TreeItem('No credentials saved', vscode.TreeItemCollapsibleState.None) as EmptyItem
-        item.id = 'empty'
+        const item = createEmptyTreeItem(
+            'No credentials saved',
+            'emptyCredentials'
+        ) as EmptyItem
         item.type = 'empty'
-        item.contextValue = 'emptyCredentials'
-        item.iconPath = new vscode.ThemeIcon('info')
         return item
     }
-} 
+}

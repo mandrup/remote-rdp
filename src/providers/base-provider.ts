@@ -1,24 +1,22 @@
 import * as vscode from 'vscode'
 
 export default abstract class BaseProvider<T> implements vscode.TreeDataProvider<T> {
-    protected readonly _onDidChangeTreeData = new vscode.EventEmitter<T | undefined>()
-
-    readonly onDidChangeTreeData: vscode.Event<T | undefined> = this._onDidChangeTreeData.event
+    private readonly onDidChangeTreeDataEmitter = new vscode.EventEmitter<T | undefined>()
+    readonly onDidChangeTreeData: vscode.Event<T | undefined> = this.onDidChangeTreeDataEmitter.event
 
     refresh(item?: T): void {
         try {
-            this._onDidChangeTreeData.fire(item)
+            this.onDidChangeTreeDataEmitter.fire(item)
         } catch (error) {
             console.error('Failed to refresh tree view:', error)
-            this._onDidChangeTreeData.fire(undefined)
+            this.onDidChangeTreeDataEmitter.fire(undefined)
         }
     }
 
     abstract getTreeItem(element: T): vscode.TreeItem
-
     abstract getChildren(element?: T): Thenable<T[]>
 
     dispose(): void {
-        this._onDidChangeTreeData.dispose()
+        this.onDidChangeTreeDataEmitter.dispose()
     }
 }

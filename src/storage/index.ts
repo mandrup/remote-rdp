@@ -1,16 +1,15 @@
-import readConnections from './connections/read'
-import createConnection from './connections/create'
+import { getAllConnections } from './connections/get'
+import { createConnection } from './connections/create'
 import { clearConnectionsCredential, updateConnections, updateConnectionsCredential } from './connections/update'
-import deleteConnection from './connections/delete'
-import { getCredentialWithPassword, readCredentials, readCredentialUsernames } from './credentials/read'
-import createCredential from './credentials/create'
-import { updateCredential, updateCredentialUsername } from './credentials/update'
-import deleteCredential from './credentials/delete'
-
+import { deleteConnection } from './connections/delete'
+import { getAllCredentials, getCredentialById, getCredentialWithPasswordById } from './credentials/get'
+import { createCredential } from './credentials/create'
+import { updateCredential } from './credentials/update'
+import { deleteCredential } from './credentials/delete'
 
 export const Storage = {
     connection: {
-        readAll: readConnections,
+        getAll: getAllConnections,
         create: createConnection,
         updateAll: updateConnections,
         updateAllCredential: updateConnectionsCredential,
@@ -18,12 +17,11 @@ export const Storage = {
         delete: deleteConnection
     },
     credential: {
-        readAll: readCredentials,
-        readAllUsernames: readCredentialUsernames,
-        readWithPassword: getCredentialWithPassword,
+        get: getCredentialById,
+        getWithPassword: getCredentialWithPasswordById,
+        getAll: getAllCredentials,
         create: createCredential,
         update: updateCredential,
-        updateUsername: updateCredentialUsername,
         delete: deleteCredential
     }
 }
