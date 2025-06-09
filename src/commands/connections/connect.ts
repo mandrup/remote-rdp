@@ -38,6 +38,7 @@ export async function generateRdpContent(connection: ConnectionModel, context: a
 
   return [
     `full address:s:${connection.hostname}`,
+    `title:s:${connection.hostname}`,
     `username:s:${username}`,
     `screen mode id:i:${settings.screenModeId}`,
     `desktopwidth:i:${settings.desktopWidth}`,
@@ -81,6 +82,22 @@ interface ProcessManager {
   exec: typeof exec
 }
 
+export function sanitizeHostnameForFilename(hostname: string): string {
+  let sanitized = hostname.replace(/[<>:"/\\|?*]/g, '_')
+
+  if (!hostname.startsWith('[') || !hostname.includes(']')) {
+    sanitized = sanitized.replace(/\./g, '-')
+  } else {
+    sanitized = sanitized.replace(/(\[[^\]]*):([^\]]*\])/g, '$1_$2')
+  }
+
+  if (sanitized.length > 50) {
+    sanitized = sanitized.substring(0, 50)
+  }
+
+  return sanitized
+}
+
 export default async function connectConnectionCommand(
   context: vscode.ExtensionContext,
   item?: vscode.TreeItem,
@@ -110,7 +127,9 @@ export default async function connectConnectionCommand(
     }
 
     const rdpContent = await generateRdpContent(connection, context)
-    const tmpRdp = path.join(os.tmpdir(), `remote-rdp-${Date.now()}.rdp`)
+    const sanitizedHostname = sanitizeHostnameForFilename(connection.hostname)
+    const timestamp = Date.now()
+    const tmpRdp = path.join(os.tmpdir(), `remote-rdp-${sanitizedHostname}-${timestamp}.rdp`)
     fileSystem.writeFileSync(tmpRdp, rdpContent, { encoding: 'utf8' })
 
     await setupWindowsCredential(connection.hostname, credential.username, credential.password, processManager.exec)

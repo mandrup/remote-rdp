@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import type { ConnectionModel } from '../models/connection'
 import type { CredentialModel } from '../models/credential'
-import { UI_CONSTANTS } from '../constants'
 import { logError, getUserErrorMessage, isRemoteRdpError } from '../errors'
 
 export function createBaseTreeItem(
@@ -61,33 +60,49 @@ export function createGroupTreeItem(
     return item
 }
 
+export function formatRelativeTime(date: Date | string): string {
+    const now = new Date()
+    const targetDate = typeof date === 'string' ? new Date(date) : date
+    const diffMs = now.getTime() - targetDate.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+
+    if (diffDays === 0) { return 'today' }
+    if (diffDays === 1) { return 'yesterday' }
+    if (diffDays < 7) { return rtf.format(-diffDays, 'day') }
+    if (diffDays < 30) { return rtf.format(-Math.floor(diffDays / 7), 'week') }
+    if (diffDays < 365) { return rtf.format(-Math.floor(diffDays / 30), 'month') }
+    return rtf.format(-Math.floor(diffDays / 365), 'year')
+}
+
 export function formatConnectionTooltip(
     connection: ConnectionModel,
     credentialUsername: string
 ): string {
+    const group = connection.group?.trim() || 'Ungrouped'
+    const credential = credentialUsername === 'No credential assigned' ? 'None' : credentialUsername
+
     return [
-        `Hostname: ${connection.hostname}`,
-        `Group: ${connection.group?.trim() || 'None'}`,
-        `Credential: ${credentialUsername}`,
-        `Created at: ${connection.createdAt || 'N/A'}`,
-        `Modified at: ${connection.modifiedAt || 'N/A'}`
+        `Group: ${group}`,
+        `Host: ${connection.hostname}`,
+        `Credential: ${credential}`
     ].join('\n')
 }
 
 export function formatCredentialTooltip(credential: CredentialModel): string {
     const createdAt = credential.createdAt
-        ? new Date(credential.createdAt).toLocaleString()
+        ? formatRelativeTime(credential.createdAt)
         : 'N/A'
-    
+
     const modifiedAt = credential.modifiedAt
-        ? new Date(credential.modifiedAt).toLocaleString()
+        ? formatRelativeTime(credential.modifiedAt)
         : 'N/A'
 
     return [
         `Username: ${credential.username}`,
-        `Password: ${UI_CONSTANTS.PASSWORD_MASK_CHAR.repeat(UI_CONSTANTS.PASSWORD_MASK_LENGTH)}`,
-        `Created at: ${createdAt}`,
-        `Modified at: ${modifiedAt}`
+        `Created: ${createdAt}`,
+        `Modified: ${modifiedAt}`
     ].join('\n')
 }
 
@@ -95,8 +110,7 @@ export function sortConnectionsByGroup(connections: ConnectionModel[]): Connecti
     return connections.sort((a, b) => {
         const groupA = a.group?.trim() || ''
         const groupB = b.group?.trim() || ''
-        
-        // Sort ungrouped connections first (empty string sorts before other strings)
+
         if (groupA !== groupB) {
             return groupA.localeCompare(groupB)
         }
@@ -119,16 +133,16 @@ export function groupConnectionsByGroup(connections: ConnectionModel[]): Map<str
 
 export function handleProviderError(operation: string, error: unknown, userMessage: string): never[] {
     logError(error, `provider-${operation}`)
-    
+
     const message = isRemoteRdpError(error) ? getUserErrorMessage(error) : userMessage
     vscode.window.showErrorMessage(message)
-    
+
     return []
 }
 
 export function handleDragDropError(operation: string, error: unknown, userMessage: string): void {
     logError(error, `drag-drop-${operation}`)
-    
+
     const message = isRemoteRdpError(error) ? getUserErrorMessage(error) : userMessage
     vscode.window.showErrorMessage(message)
 }

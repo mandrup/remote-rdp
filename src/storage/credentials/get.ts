@@ -32,7 +32,13 @@ export async function getAllCredentials(context: vscode.ExtensionContext): Promi
         throw ErrorFactory.storage.invalidCredentialData()
     }
 
-    await migrateCredentialsIfNeeded(context, stored)
+    migrateCredentialsIfNeeded(context, stored)
+        .then(migrationOccurred => {
+            if (migrationOccurred && !process.env.VSCODE_TEST) {
+                vscode.commands.executeCommand('remote-rdp:connection:refresh')
+            }
+        })
+        .catch(console.error)
 
     return Promise.all(
         stored.map(async ({ id, username, created_at, modified_at }) => {
@@ -93,7 +99,7 @@ export async function getAllCredentialUsernames(context: vscode.ExtensionContext
 async function migrateCredentialsIfNeeded(
     context: vscode.ExtensionContext,
     credentials: StoredCredentialModel[]
-): Promise<void> {
+): Promise<boolean> {
     let needsUpdate = false
     for (const credential of credentials) {
         if (!credential.created_at) {
@@ -104,4 +110,6 @@ async function migrateCredentialsIfNeeded(
     if (needsUpdate) {
         await context.globalState.update(PREFIXES.credential, credentials)
     }
+    
+    return needsUpdate
 }

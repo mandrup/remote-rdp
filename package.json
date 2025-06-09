@@ -1,7 +1,7 @@
 {
   "name": "remote-rdp",
   "publisher": "mandrup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "displayName": "Remote - RDP",
   "description": "Securely manage and launch Remote Desktop (RDP) sessions from within Visual Studio Code on Windows.",
   "categories": [
@@ -42,14 +42,14 @@
   "devDependencies": {
     "@types/node": "^22.15.30",
     "@types/vscode": "^1.100.0",
-    "@typescript-eslint/eslint-plugin": "^8.33.1",
-    "@typescript-eslint/parser": "^8.33.0",
-    "@vitest/ui": "^3.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "@vitest/ui": "^3.2.3",
     "@vscode/vsce": "^3.5.0",
     "eslint": "^9.28.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.3.3",
-    "vitest": "^3.2.2"
+    "vitest": "^3.2.3"
   },
   "contributes": {
     "viewsContainers": {

@@ -24,9 +24,7 @@ export const COMMAND_IDS = {
 } as const
 
 export const UI_CONSTANTS = {
-    DOUBLE_CLICK_DELAY: 300,
-    PASSWORD_MASK_LENGTH: 8,
-    PASSWORD_MASK_CHAR: '*'
+    DOUBLE_CLICK_DELAY: 300
 } as const
 
 export const ERROR_MESSAGES = {
