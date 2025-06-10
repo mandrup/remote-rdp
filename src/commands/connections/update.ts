@@ -3,7 +3,7 @@ import { Storage } from '../../storage'
 import { Prompts } from '../../prompts'
 import { ConnectionGroupItem, ConnectionTreeItem } from '../../providers'
 import { updateConnectionById, updateGroupCredentials } from '../../storage/shared'
-import { handleCommandError, refreshViews, refreshConnections, validatePromptResult, isGroupPromptCancelled, getGroupValue } from '../shared'
+import { handleCommandError, refreshViews, validatePromptResult, isGroupPromptCancelled, getGroupValue } from '../shared'
 
 export async function updateConnectionCommand(context: vscode.ExtensionContext, item?: vscode.TreeItem): Promise<void> {
     try {
@@ -58,7 +58,7 @@ export async function updateGroupCredentialsCommand(context: vscode.ExtensionCon
         const updatedConnections = updateGroupCredentials(connections, groupItem.group, credentialId)
 
         await Storage.connection.updateAll(context, updatedConnections)
-        await refreshConnections()
+        await refreshViews()
     } catch (error) {
         await handleCommandError('update group credentials', error)
     }

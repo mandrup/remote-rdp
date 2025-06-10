@@ -1,7 +1,7 @@
 {
   "name": "remote-rdp",
   "publisher": "mandrup",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "Remote - RDP",
   "description": "Securely manage and launch Remote Desktop (RDP) sessions from within Visual Studio Code on Windows.",
   "categories": [
