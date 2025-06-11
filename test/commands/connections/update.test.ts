@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { standardBeforeEach, __mockPrompts, __mockStorage } from '../../test-utils'
 import * as vscode from 'vscode'
-import { COMMAND_IDS } from '@/constants'
 import { updateConnectionCommand, updateGroupCredentialsCommand } from '@/commands/connections/update'
 import * as shared from '@/commands/shared'
 
@@ -16,7 +15,6 @@ vi.mock('@/commands/shared', () => ({
 
 const mockHandleCommandError = vi.mocked(shared.handleCommandError)
 const mockRefreshViews = vi.mocked(shared.refreshViews)
-const mockRefreshConnections = vi.mocked(shared.refreshConnections)
 
 describe('updateConnectionCommand', () => {
   const context = {} as any
@@ -115,7 +113,7 @@ describe('updateGroupCredentialsCommand', () => {
       { id: '1', group: 'g', credentialId: 'newuser', modifiedAt: expect.any(String) },
       { id: '2', group: 'other', credentialId: 'old2' }
     ])
-    expect(mockRefreshConnections).toHaveBeenCalled()
+    expect(mockRefreshViews).toHaveBeenCalled()
   })
 
   it('shows error when item is not a group', async () => {
