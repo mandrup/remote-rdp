@@ -45,19 +45,22 @@ describe('promptForConnection', () => {
       { id: '2', hostname: 'h2', created_at: '2024-01-02' }
     ]
     __mockStorage.connection.getAll.mockReturnValue(connections)
-    mockShowQuickPick.mockResolvedValue({ id: '1' })
+    mockShowQuickPick.mockResolvedValue({
+      label: 'h1',
+      description: 'Group: g',
+      detail: 'No credential',
+      id: '1'
+    })
     const result = await promptForConnection(context)
     expect(mockShowQuickPick).toHaveBeenCalledWith([
       {
         label: 'h1',
         description: 'Group: g',
-        detail: 'No credential',
         id: '1'
       },
       {
         label: 'h2',
         description: undefined,
-        detail: 'No credential',
         id: '2'
       }
     ], expect.anything())
@@ -70,6 +73,16 @@ describe('promptForConnection', () => {
     ]
     __mockStorage.connection.getAll.mockReturnValue(connections)
     mockShowQuickPick.mockResolvedValue(undefined)
+    const result = await promptForConnection(context)
+    expect(result).toBeUndefined()
+  })
+
+  it('returns undefined when selected object has no id property', async () => {
+    const connections = [
+      { id: '1', hostname: 'h1', created_at: '2024-01-01' }
+    ]
+    __mockStorage.connection.getAll.mockReturnValue(connections)
+    mockShowQuickPick.mockResolvedValue({ label: 'h1', description: undefined, detail: 'No credential' })
     const result = await promptForConnection(context)
     expect(result).toBeUndefined()
   })

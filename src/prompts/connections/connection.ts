@@ -21,13 +21,10 @@ export async function promptForConnection(
         connections.map(connection => ({
             label: connection.hostname,
             description: connection.group ? `Group: ${connection.group}` : undefined,
-            detail: connection.credentialId
-                ? `Credential ID: ${connection.credentialId}`
-                : 'No credential',
             id: connection.id,
         })),
         { placeHolder: 'Select a connection' }
     )
 
-    return selected ? connections.find(c => c.id === selected.id) : undefined
+    return selected && selected.id ? connections.find(c => c.id === selected.id) : undefined
 }

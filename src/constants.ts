@@ -10,10 +10,11 @@ export const COMMAND_IDS = {
         create: `${PREFIXES.connection}:create`,
         delete: `${PREFIXES.connection}:delete`,
         update: `${PREFIXES.connection}:update`,
+        updateGroup: `${PREFIXES.connection}:update-group`,
         connect: `${PREFIXES.connection}:connect`,
         refresh: `${PREFIXES.connection}:refresh`,
         import: `${PREFIXES.connection}:import`,
-        export: `${PREFIXES.connection}:export`
+        export: `${PREFIXES.connection}:export`,
     },
     credential: {
         create: `${PREFIXES.credential}:create`,

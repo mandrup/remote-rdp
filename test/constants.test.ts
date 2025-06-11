@@ -11,6 +11,7 @@ describe('constants', () => {
     expect(COMMAND_IDS.connection.create).toBe('remote-rdp:connection:create')
     expect(COMMAND_IDS.connection.delete).toBe('remote-rdp:connection:delete')
     expect(COMMAND_IDS.connection.update).toBe('remote-rdp:connection:update')
+    expect(COMMAND_IDS.connection.updateGroup).toBe('remote-rdp:connection:update-group')
     expect(COMMAND_IDS.connection.connect).toBe('remote-rdp:connection:connect')
     expect(COMMAND_IDS.connection.refresh).toBe('remote-rdp:connection:refresh')
     expect(COMMAND_IDS.connection.import).toBe('remote-rdp:connection:import')

@@ -27,19 +27,26 @@ export function registerCommands(context: vscode.ExtensionContext): void {
     sub.push(register(COMMAND_IDS.connection.create, () => createConnectionCommand(context)))
     sub.push(register(COMMAND_IDS.connection.update, (item?: vscode.TreeItem) => updateConnectionCommand(context, item)))
     sub.push(register(COMMAND_IDS.connection.delete, (item?: vscode.TreeItem) => deleteConnectionCommand(context, item)))
-    sub.push(register(COMMAND_IDS.connection.connect,
-        createDoubleClickHandler(async (item) => {
-            try {
-                await connectConnectionCommand(context, item)
-            } catch (error) {
-                handleCommandError('connect to connection', error)
+
+    const connectDoubleClickHandler = createDoubleClickHandler(async (item) => {
+        await connectConnectionCommand(context, item)
+    })
+
+    sub.push(register(COMMAND_IDS.connection.connect, async (item?: vscode.TreeItem) => {
+        try {
+            if (!item) {
+                await connectConnectionCommand(context)
+                return
             }
-        })
-    ))
+            
+            connectDoubleClickHandler(item)
+        } catch (error) {
+            handleCommandError('connect to connection', error)
+        }
+    }))
     sub.push(register(COMMAND_IDS.connection.import, () => importConnectionsCommand(context)))
     sub.push(register(COMMAND_IDS.connection.export, () => exportConnectionsCommand(context)))
-    sub.push(register('remote-rdp:connection:updateGroupCredentialsCommand',
-        (item?: ConnectionTreeItem) => updateGroupCredentialsCommand(context, item)
+    sub.push(register(COMMAND_IDS.connection.updateGroup, (item?: ConnectionTreeItem) => updateGroupCredentialsCommand(context, item)
     ))
 
     sub.push(register(COMMAND_IDS.credential.create, () => createCredentialCommand(context)))
