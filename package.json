@@ -40,13 +40,13 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^22.15.30",
-    "@types/vscode": "^1.100.0",
+    "@types/node": "^24.0.1",
+    "@types/vscode": "^1.101.0",
     "@typescript-eslint/eslint-plugin": "^8.34.0",
     "@typescript-eslint/parser": "^8.34.0",
     "@vitest/ui": "^3.2.3",
     "@vscode/vsce": "^3.5.0",
-    "eslint": "^9.28.0",
+    "eslint": "^9.29.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.3.3",
     "vitest": "^3.2.3"
