@@ -11,6 +11,7 @@ export const COMMAND_IDS = {
         delete: `${PREFIXES.connection}:delete`,
         update: `${PREFIXES.connection}:update`,
         updateGroup: `${PREFIXES.connection}:update-group`,
+        configure: `${PREFIXES.connection}:configure`,
         connect: `${PREFIXES.connection}:connect`,
         refresh: `${PREFIXES.connection}:refresh`,
         import: `${PREFIXES.connection}:import`,

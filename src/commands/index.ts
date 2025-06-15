@@ -3,7 +3,7 @@ import { COMMAND_IDS } from '../constants'
 import { ConnectionTreeItem } from '../providers'
 import { createDoubleClickHandler } from './shared'
 import createConnectionCommand from './connections/create'
-import { updateConnectionCommand, updateGroupCredentialsCommand } from './connections/update'
+import { updateConnectionCommand, updateGroupCredentialsCommand, configureConnectionSettingsCommand } from './connections/update'
 import deleteConnectionCommand from './connections/delete'
 import connectConnectionCommand from './connections/connect'
 import importConnectionsCommand from './connections/import'
@@ -27,6 +27,7 @@ export function registerCommands(context: vscode.ExtensionContext): void {
     sub.push(register(COMMAND_IDS.connection.create, () => createConnectionCommand(context)))
     sub.push(register(COMMAND_IDS.connection.update, (item?: vscode.TreeItem) => updateConnectionCommand(context, item)))
     sub.push(register(COMMAND_IDS.connection.delete, (item?: vscode.TreeItem) => deleteConnectionCommand(context, item)))
+    sub.push(register(COMMAND_IDS.connection.configure, (item?: vscode.TreeItem) => configureConnectionSettingsCommand(context, item)))
 
     const connectDoubleClickHandler = createDoubleClickHandler(async (item) => {
         await connectConnectionCommand(context, item)

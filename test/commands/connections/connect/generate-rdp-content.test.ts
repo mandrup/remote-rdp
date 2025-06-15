@@ -22,11 +22,11 @@ describe('generateRdpContent', () => {
     const content = await generateRdpContent(baseConnection, context)
     expect(content).toContain('full address:s:host.example')
     expect(content).toContain('username:s:user')
-    expect(content).toContain(`screen mode id:i:${defaultConnectionSettings.screenModeId}`)
-    expect(content).toContain(`desktopwidth:i:${defaultConnectionSettings.desktopWidth}`)
-    expect(content).toContain(`desktopheight:i:${defaultConnectionSettings.desktopHeight}`)
-    expect(content).toContain(`session bpp:i:${defaultConnectionSettings.sessionBpp}`)
-    expect(content).toContain(`authentication level:i:${defaultConnectionSettings.authenticationLevel}`)
+    expect(content).toContain(`screen mode id:i:${defaultConnectionSettings.display.screenModeId}`)
+    expect(content).toContain(`desktopwidth:i:${defaultConnectionSettings.display.desktopWidth}`)
+    expect(content).toContain(`desktopheight:i:${defaultConnectionSettings.display.desktopHeight}`)
+    expect(content).toContain(`session bpp:i:${defaultConnectionSettings.display.sessionBpp}`)
+    expect(content).toContain(`authentication level:i:${defaultConnectionSettings.authentication.authenticationLevel}`)
     expect(content).toContain(`prompt for credentials:i:0`)
     expect(content).toContain(`redirectclipboard:i:1`)
     expect(content).toContain(`redirectprinters:i:1`)
@@ -36,15 +36,21 @@ describe('generateRdpContent', () => {
   it('overrides default settings with connectionSettings', async () => {
     Storage.credential.get = vi.fn().mockResolvedValue({ id: 'cred-1', username: 'user', password: 'pass' })
     const customSettings: ConnectionSettings = {
-      screenModeId: 1,
-      desktopWidth: 800,
-      desktopHeight: 600,
-      sessionBpp: 16,
-      authenticationLevel: 0,
-      promptForCredentials: true,
-      redirectClipboard: false,
-      redirectPrinters: false,
-      driveStoreRedirect: 'D:'
+      display: {
+        screenModeId: 1,
+        desktopWidth: 800,
+        desktopHeight: 600,
+        sessionBpp: 16
+      },
+      authentication: {
+        authenticationLevel: 0,
+        promptForCredentials: true
+      },
+      redirection: {
+        redirectClipboard: false,
+        redirectPrinters: false,
+        driveStoreRedirect: 'D:'
+      }
     }
     const connection: ConnectionModel = {
       ...baseConnection,

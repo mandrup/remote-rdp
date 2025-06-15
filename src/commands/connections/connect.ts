@@ -10,21 +10,77 @@ import { ConnectionModel, ConnectionSettings } from '../../models/connection'
 import { handleCommandError, validatePromptResult, validatePlatformSupport, validateConnectionCredentials, showCredentialNotFoundError } from '../shared'
 
 export const defaultConnectionSettings: Required<ConnectionSettings> = {
-  screenModeId: 2,
-  desktopWidth: 1920,
-  desktopHeight: 1080,
-  sessionBpp: 32,
-  authenticationLevel: 2,
-  promptForCredentials: false,
-  redirectClipboard: true,
-  redirectPrinters: true,
-  driveStoreRedirect: ''
+  display: {
+    screenModeId: 2,
+    desktopWidth: 1920,
+    desktopHeight: 1080,
+    sessionBpp: 32
+  },
+  authentication: {
+    authenticationLevel: 2,
+    promptForCredentials: false,
+    enableCredSSPSupport: true
+  },
+  redirection: {
+    redirectClipboard: true,
+    redirectPrinters: true,
+    driveStoreRedirect: '',
+    redirectSmartCards: false,
+    redirectPorts: false
+  },
+  audio: {
+    audioMode: 0,
+    audioQualityMode: 0
+  },
+  performance: {
+    disableWallpaper: false,
+    disableFullWindowDrag: false,
+    disableMenuAnims: false,
+    disableThemes: false,
+    compression: true
+  },
+  network: {
+    bandwidthAutoDetect: true,
+    displayConnectionBar: true
+  },
+  gateway: {
+    gatewayHostname: '',
+    gatewayUsageMethod: 0
+  }
 }
 
 export function getResolvedConnectionSettings(connection: ConnectionModel): Required<ConnectionSettings> {
+  const customSettings = connection.connectionSettings || {}
+  
   return {
-    ...defaultConnectionSettings,
-    ...connection.connectionSettings
+    display: {
+      ...defaultConnectionSettings.display,
+      ...customSettings.display
+    },
+    authentication: {
+      ...defaultConnectionSettings.authentication,
+      ...customSettings.authentication
+    },
+    redirection: {
+      ...defaultConnectionSettings.redirection,
+      ...customSettings.redirection
+    },
+    audio: {
+      ...defaultConnectionSettings.audio,
+      ...customSettings.audio
+    },
+    performance: {
+      ...defaultConnectionSettings.performance,
+      ...customSettings.performance
+    },
+    network: {
+      ...defaultConnectionSettings.network,
+      ...customSettings.network
+    },
+    gateway: {
+      ...defaultConnectionSettings.gateway,
+      ...customSettings.gateway
+    }
   }
 }
 
@@ -40,15 +96,39 @@ export async function generateRdpContent(connection: ConnectionModel, context: a
     `full address:s:${connection.hostname}`,
     `title:s:${connection.hostname}`,
     `username:s:${username}`,
-    `screen mode id:i:${settings.screenModeId}`,
-    `desktopwidth:i:${settings.desktopWidth}`,
-    `desktopheight:i:${settings.desktopHeight}`,
-    `session bpp:i:${settings.sessionBpp}`,
-    `authentication level:i:${settings.authenticationLevel}`,
-    `prompt for credentials:i:${settings.promptForCredentials ? 1 : 0}`,
-    `redirectclipboard:i:${settings.redirectClipboard ? 1 : 0}`,
-    `redirectprinters:i:${settings.redirectPrinters ? 1 : 0}`,
-    `drivestoredirect:s:${settings.driveStoreRedirect}`
+    
+    `screen mode id:i:${settings.display.screenModeId}`,
+    `desktopwidth:i:${settings.display.desktopWidth}`,
+    `desktopheight:i:${settings.display.desktopHeight}`,
+    `session bpp:i:${settings.display.sessionBpp}`,
+    
+    `authentication level:i:${settings.authentication.authenticationLevel}`,
+    `prompt for credentials:i:${settings.authentication.promptForCredentials ? 1 : 0}`,
+    `enablecredsspsupport:i:${settings.authentication.enableCredSSPSupport ? 1 : 0}`,
+    
+    `redirectclipboard:i:${settings.redirection.redirectClipboard ? 1 : 0}`,
+    `redirectprinters:i:${settings.redirection.redirectPrinters ? 1 : 0}`,
+    `drivestoredirect:s:${settings.redirection.driveStoreRedirect}`,
+    `redirectsmartcards:i:${settings.redirection.redirectSmartCards ? 1 : 0}`,
+    `redirectcomports:i:${settings.redirection.redirectPorts ? 1 : 0}`,
+    
+    `audiomode:i:${settings.audio.audioMode}`,
+    `audiocapturemode:i:1`,
+    `audioqualitymode:i:${settings.audio.audioQualityMode}`,
+    
+    `disable wallpaper:i:${settings.performance.disableWallpaper ? 1 : 0}`,
+    `disable full window drag:i:${settings.performance.disableFullWindowDrag ? 1 : 0}`,
+    `disable menu anims:i:${settings.performance.disableMenuAnims ? 1 : 0}`,
+    `disable themes:i:${settings.performance.disableThemes ? 1 : 0}`,
+    `compression:i:${settings.performance.compression ? 1 : 0}`,
+    
+    `bandwidthautodetect:i:${settings.network.bandwidthAutoDetect ? 1 : 0}`,
+    `displayconnectionbar:i:${settings.network.displayConnectionBar ? 1 : 0}`,
+    
+    ...(settings.gateway.gatewayHostname ? [
+      `gatewayhostname:s:${settings.gateway.gatewayHostname}`,
+      `gatewayusagemethod:i:${settings.gateway.gatewayUsageMethod}`
+    ] : [])
   ].join('\r\n')
 }
 

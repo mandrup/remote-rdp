@@ -110,6 +110,11 @@
           "group": "inline@1"
         },
         {
+          "command": "remote-rdp:connection:configure",
+          "when": "view == remoteRdpConnections && viewItem == connectionItem",
+          "group": "inline@0"
+        },
+        {
           "command": "remote-rdp:connection:update-group",
           "when": "view == remoteRdpConnections && viewItem == connectionGroup",
           "group": "inline@0"
@@ -141,6 +146,11 @@
         "command": "remote-rdp:connection:update",
         "title": "Update: RDP Connection",
         "icon": "$(edit)"
+      },
+      {
+        "command": "remote-rdp:connection:configure",
+        "title": "Configure: RDP Connection Settings",
+        "icon": "$(settings-gear)"
       },
       {
         "command": "remote-rdp:connection:export",

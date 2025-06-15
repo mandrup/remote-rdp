@@ -4,6 +4,8 @@ import { Prompts } from '../../prompts'
 import { ConnectionGroupItem, ConnectionTreeItem } from '../../providers'
 import { updateConnectionById, updateGroupCredentials } from '../../storage/shared'
 import { handleCommandError, refreshViews, validatePromptResult, isGroupPromptCancelled, getGroupValue } from '../shared'
+import { promptForConnectionSettings } from '../../prompts/connections/settings'
+import { validateConnectionSettings, sanitizeConnectionSettings } from '../../models/connection'
 
 export async function updateConnectionCommand(context: vscode.ExtensionContext, item?: vscode.TreeItem): Promise<void> {
     try {
@@ -61,5 +63,54 @@ export async function updateGroupCredentialsCommand(context: vscode.ExtensionCon
         await refreshViews()
     } catch (error) {
         await handleCommandError('update group credentials', error)
+    }
+}
+
+export async function configureConnectionSettingsCommand(context: vscode.ExtensionContext, item?: vscode.TreeItem): Promise<void> {
+    try {
+        const connection = await Prompts.connection.select(context, item)
+        if (!validatePromptResult(connection)) {
+            return
+        }
+
+        const updatedSettings = await promptForConnectionSettings(connection.connectionSettings)
+        if (!updatedSettings) {
+            return
+        }
+
+        // Validate the settings
+        const validation = validateConnectionSettings(updatedSettings)
+        if (!validation.isValid) {
+            const errorMessage = `Invalid connection settings:\n${validation.errors.join('\n')}`
+            const choice = await vscode.window.showWarningMessage(
+                errorMessage + '\n\nWould you like to automatically fix these issues?',
+                'Fix Automatically', 
+                'Cancel'
+            )
+            
+            if (choice !== 'Fix Automatically') {
+                return
+            }
+        }
+
+        // Sanitize the settings to ensure they're within valid ranges
+        const sanitizedSettings = sanitizeConnectionSettings(updatedSettings)
+
+        const connections = Storage.connection.getAll(context)
+        const updatedConnections = updateConnectionById(connections, connection.id, {
+            ...connection,
+            connectionSettings: sanitizedSettings,
+            modifiedAt: new Date().toISOString()
+        })
+
+        await Storage.connection.updateAll(context, updatedConnections)
+        await refreshViews()
+
+        const message = validation.isValid 
+            ? `Connection settings updated for ${connection.hostname}`
+            : `Connection settings updated and fixed for ${connection.hostname}`
+        vscode.window.showInformationMessage(message)
+    } catch (error) {
+        await handleCommandError('configure connection settings', error)
     }
 }
